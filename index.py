@@ -9,10 +9,11 @@ from stemmer import stem
 def read_docs(filepath: Path):
     """
     Reads documents from a file and returns a dictionary mapping indices  to documents.
+    Make sure to id from 1 onwards.
     """
     with open(filepath, "r") as file:
         doc_list = file.readlines()
-    return {doc_id: doc for doc_id, doc in enumerate(doc_list) if doc.strip()}
+    return {doc_id + 1: doc for doc_id, doc in enumerate(doc_list) if doc.strip()}
 
 
 def preprocess(text: str) -> str:

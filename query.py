@@ -1,5 +1,4 @@
 from index import (
-    create_positional_inverted_index,
     preprocess,
     remove_stop_words,
     tokenize,

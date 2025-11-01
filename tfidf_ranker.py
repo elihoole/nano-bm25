@@ -2,6 +2,8 @@ def rank_with_tf(query_terms, positional_inverted_index):
     """Rank documents basked purely on TF (term frequency)."""
     from collections import defaultdict
 
+    query_terms = list(set(query_terms))  # unique terms only
+
     # Initialize a dictionary to hold term frequencies for each document
     doc_term_freq = defaultdict(lambda: defaultdict(int))
 
@@ -9,7 +11,7 @@ def rank_with_tf(query_terms, positional_inverted_index):
     for term in query_terms:
         if term in positional_inverted_index:
             for doc_id, positions in positional_inverted_index[term].items():
-                doc_term_freq[doc_id][term] += len(positions)
+                doc_term_freq[doc_id][term] = len(positions)
 
     print("Document Term Frequencies:", dict(doc_term_freq))
 
@@ -30,6 +32,8 @@ def rank_with_idf(query_terms, positional_inverted_index):
     import math
     from collections import defaultdict
 
+    query_terms = list(set(query_terms))  # unique terms only
+
     # Initialize a dictionary to hold IDF scores for each document
     doc_idf_scores = defaultdict(float)
     total_docs = len(
@@ -38,19 +42,113 @@ def rank_with_idf(query_terms, positional_inverted_index):
             for term_postings in positional_inverted_index.values()
             for doc_id in term_postings.keys()
         }
-    )
+    )  # Fancy way to count but value is just 10 (number of lines in docs/docs.txt)
+    print("Total documents (N):", total_docs)
     # Calculate IDF scores for each document
     for term in query_terms:
         if term in positional_inverted_index:
-            df = len(positional_inverted_index[term])  # Document frequency
+            df = len(positional_inverted_index[term])
+            print("Document frequency for term '{}': {}".format(term, df))
             idf = math.log((total_docs + 1) / (df + 1)) + 1  # Smoothed IDF
-            for doc_id, positions in positional_inverted_index[term].items():
+            print("IDF for term '{}': {}".format(term, idf))
+            for doc_id, _ in positional_inverted_index[term].items():
                 doc_idf_scores[doc_id] += idf
 
     print("Document IDF Scores:", dict(doc_idf_scores))
 
     # Sort documents by their IDF scores in descending order
     ranked_docs = sorted(doc_idf_scores.items(), key=lambda item: item[1], reverse=True)
+
+    return ranked_docs
+
+
+def rank_with_tf_idf(query_terms, positional_inverted_index):
+    """Rank documents based on TF-IDF scores."""
+    import math
+    from collections import defaultdict
+
+    query_terms = list(set(query_terms))  # unique terms only
+
+    # Initialize dictionaries to hold term frequencies and IDF scores
+    doc_term_freq = defaultdict(lambda: defaultdict(int))
+    doc_tfidf_scores = defaultdict(float)
+    total_docs = len(
+        {
+            doc_id
+            for term_postings in positional_inverted_index.values()
+            for doc_id in term_postings.keys()
+        }
+    )  # Fancy way to count but value is just 10 (number of lines in docs/docs.txt)
+
+    # Calculate term frequencies for each document
+    for term in query_terms:
+        if term in positional_inverted_index:
+            for doc_id, positions in positional_inverted_index[term].items():
+                doc_term_freq[doc_id][term] = len(positions)
+
+    # Calculate TF-IDF scores for each document
+    for term in query_terms:
+        if term in positional_inverted_index:
+            df = len(positional_inverted_index[term])  # Document frequency
+            idf = math.log((total_docs + 1) / (df + 1)) + 1  # Smoothed IDF
+            for doc_id, tf in doc_term_freq.items():
+                if term in tf:
+                    tf_value = tf[term]
+                    tfidf = tf_value * idf
+                    doc_tfidf_scores[doc_id] += tfidf
+
+    print("Document TF-IDF Scores:", dict(doc_tfidf_scores))
+
+    # Sort documents by their TF-IDF scores in descending order
+    ranked_docs = sorted(
+        doc_tfidf_scores.items(), key=lambda item: item[1], reverse=True
+    )
+
+    return ranked_docs
+
+
+def rank_with_sublinear_tf_idf(query_terms, positional_inverted_index):
+    """Rank documents based on sublinear TF-IDF scores."""
+    import math
+    from collections import defaultdict
+
+    query_terms = list(set(query_terms))  # unique terms only
+
+    # Initialize dictionaries to hold term frequencies and IDF scores
+    doc_term_freq = defaultdict(lambda: defaultdict(int))
+    doc_tfidf_scores = defaultdict(float)
+    total_docs = len(
+        {
+            doc_id
+            for term_postings in positional_inverted_index.values()
+            for doc_id in term_postings.keys()
+        }
+    )  # Fancy way to count but value is just 10 (number of lines in docs/docs.txt)
+
+    # Calculate term frequencies for each document
+    for term in query_terms:
+        if term in positional_inverted_index:
+            for doc_id, positions in positional_inverted_index[term].items():
+                doc_term_freq[doc_id][term] = len(positions)
+
+    # Calculate sublinear TF-IDF scores for each document
+    for term in query_terms:
+        if term in positional_inverted_index:
+            df = len(positional_inverted_index[term])  # Document frequency
+            idf = math.log((total_docs + 1) / (df + 1)) + 1  # Smoothed IDF
+            for doc_id, tf in doc_term_freq.items():
+                if term in tf:
+                    tf_value = tf[term]
+                    sublinear_tf = 1 + math.log(tf_value)
+                    tfidf = sublinear_tf * idf
+                    doc_tfidf_scores[doc_id] += tfidf
+
+    print("Document Sublinear TF-IDF Scores:", dict(doc_tfidf_scores))
+
+    # Sort documents by their Sublinear TF-IDF scores in descending order
+    ranked_docs = sorted(
+        doc_tfidf_scores.items(), key=lambda item: item[1], reverse=True
+    )
 
     return ranked_docs
 

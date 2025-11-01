@@ -85,16 +85,12 @@ curl "http://localhost:8000/fetch_all_docs?query=Can%20the%20President%20of%20th
 We introduce the idea that documents where query terms occur more . . . are more relevant than others. To retrieve a ranked list of documents based on how many times a query term occured in the document.
 
 ```bash
-
+curl "http://localhost:8000/tf_ranking?query=Can%20the%20President%20of%20the%20USA%20overrule%20the%20constitution%3F"
 ```
 
 ## Retrieval with TF-IDF
 
 We'll first do ranked retrieval with TF-IDF only.
-
-
-
-
 
 ## BM25, in one screen
 

@@ -5,7 +5,12 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 
 from query import process_query
-from tfidf_ranker import rank_with_idf, rank_with_tf
+from tfidf_ranker import (
+    rank_with_idf,
+    rank_with_sublinear_tf_idf,
+    rank_with_tf,
+    rank_with_tf_idf,
+)
 
 logger = logging.getLogger("nano_bm25")
 logger.setLevel(logging.DEBUG)
@@ -134,6 +139,70 @@ def idf_ranking(query: str = Query(..., min_length=1)):
 
     try:
         ranked_docs = rank_with_idf(processed_query, pii)
+    except Exception as e:
+        logger.error(f"Error occurred while ranking documents: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    return {
+        "status": "ok",
+        "query": query,
+        "processed_query": processed_query,
+        "ranked_documents": ranked_docs,
+    }
+
+
+@app.get("/tf_idf_ranking")
+def tf_idf_ranking(query: str = Query(..., min_length=1)):
+    """
+    Endpoint to rank documents based on TF-IDF scores for the given query.
+    """
+    pii = getattr(app.state, "pii", None)
+
+    if pii is None:
+        if not INDEX_PATH.exists():
+            raise HTTPException(
+                status_code=500,
+                detail=f"Index not found at {INDEX_PATH}. Generate it first (run index.py).",
+            )
+        pii = load_pii(INDEX_PATH)
+        app.state.pii = pii
+
+    processed_query = process_query(query)
+
+    try:
+        ranked_docs = rank_with_tf_idf(processed_query, pii)
+    except Exception as e:
+        logger.error(f"Error occurred while ranking documents: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    return {
+        "status": "ok",
+        "query": query,
+        "processed_query": processed_query,
+        "ranked_documents": ranked_docs,
+    }
+
+
+@app.get("/sublinear_tf_idf_ranking")
+def sublinear_tf_idf_ranking(query: str = Query(..., min_length=1)):
+    """
+    Endpoint to rank documents based on sublinear TF-IDF scores for the given query.
+    """
+    pii = getattr(app.state, "pii", None)
+
+    if pii is None:
+        if not INDEX_PATH.exists():
+            raise HTTPException(
+                status_code=500,
+                detail=f"Index not found at {INDEX_PATH}. Generate it first (run index.py).",
+            )
+        pii = load_pii(INDEX_PATH)
+        app.state.pii = pii
+
+    processed_query = process_query(query)
+
+    try:
+        ranked_docs = rank_with_sublinear_tf_idf(processed_query, pii)
     except Exception as e:
         logger.error(f"Error occurred while ranking documents: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
