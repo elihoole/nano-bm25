@@ -5,17 +5,15 @@ We'll use a single query to explain how retrieval works end-to-end. Before you s
 ```bash
 uv run uvicorn main:app --host 127.0.0.1 --port 8000
 ```
-\mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \frac{(k_1 + 1) \times \mathrm{tf}(t, d)}{\mathrm{tf}(t, d) + k_1 \times C}
 
-$$
 ## Query in question
 
-This is the query:
+Here's is the query:
 
-C = (1 - b) + b\,\frac{dl}{\overline{dl}}
+```bash
 Can the president of the USA rule over the constitution?
 ```
-$dl$ = document length, $\overline{dl}$ = average document length, and $k_1, b$ are constants.
+
 After applying the same preprocessing steps we applied to the document, the query looks like this:
 ```bash
 ["sident", "usa", "rule", "over", "constitu", "?"]
@@ -62,11 +60,11 @@ for term_postings in postings:
         relevant_docs.update(docs.keys())
 ```
 
-This is what the /fetch_all_docs end point does.
+This is what the `/fetch_all_docs` end point does.
 
 ## Ranking with term frequency
 
-Now if you actually look at the results from /fetch_all_docs, the first result (due to final sorting by doc_id) is doc_id "2":
+Now if you actually look at the results from `/fetch_all_docs`, the first result (due to final sorting by doc_id) is doc_id "2":
 
 ```bash
 {"2": "My objections to the current constitution of the board was overruled."}
@@ -74,9 +72,9 @@ Now if you actually look at the results from /fetch_all_docs, the first result (
 
 As you can see, doc_id "1" is not super relevant to the query. It is about the the make up --aka, constitution -- of an institutional board not about the constitution of the USA. So fetching all docs with at least one query term (and, then, naively sorting by doc_id or similar) aligns poorly with the user's expectations of relevance.
 
-We need a better signal for relevance. Enter term frequency (TF). The idea is simple: if a document contains a query term more often than other documents, it’s more likely to be about that term. So we score documents by counting how many times the query terms appear and prefer the ones with higher counts.
+Enter term frequency (TF). The idea is simple: if a document contains a query term more often than other documents, it’s more likely to be about that term. So we score documents by counting how many times the query terms appear in them and prefer the ones with higher counts.
 
-This is what the /tf_ranking endpoint does. With the current documents, the first ranked result is doc_id "4" and the second ranked result is doc_id "5":
+This is what the `/tf_ranking` endpoint does. With the current documents, the first ranked result is doc_id "4" and the second ranked result is doc_id "5":
 
 ```bash
 {"4": "Donald Trump is the 45th President of the USA. He has headed the USA since November 2024. Leftists in the USA don't like Trump. Trump was born iin New York, USA."}
@@ -141,7 +139,7 @@ In practice, we want a balance between TF and IDF. So, we multiply the two.
 Definition:
 
 $$
-\mathrm{score}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)} \mathrm{tf}(t, d)\,\mathrm{idf}(t)
+\mathrm{score}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)} \mathrm{tf}(t, d) \times \mathrm{idf}(t)
 $$
 
 
@@ -187,7 +185,7 @@ $$
 Where
 
 $$
-C = (1 - b) + b\,\frac{dl}{avgdl}
+C = (1 - b) + b \times \frac{dl}{avgdl}
 $$
 
 $dl$ = document length, $avgdl$ = average document length, and $k_1, b$ are constants.
@@ -195,7 +193,7 @@ $dl$ = document length, $avgdl$ = average document length, and $k_1, b$ are cons
 To understand BM25, we need to look at the factor that is scaling $\mathrm{tf}(t, d)$. Namely:
 
 $$
-\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1\,C}
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 \times C}
 $$
 
 Let's unpack this.
@@ -203,7 +201,7 @@ Let's unpack this.
 C here is a document length correction.
 
 $$
-C = (1 - b) + b\,\frac{dl}{\overline{dl}}
+C = (1 - b) + b \times \frac{dl}{\overline{dl}}
 $$
 
 At a glance, you can see that the larger the document length compared to the average length of the corpus, the greater the $C$ term, resulting in greater penalization of $\mathrm{tf}(t, d)$'s contribution (notice that it is part of the denominator of the scaling factor). The constant $b$ is a tunable knob: if you set it to $0$, BM25 does not apply any document length correction to $\mathrm{tf}(t, d)$; the larger the $b$, the greater the length penalty.
