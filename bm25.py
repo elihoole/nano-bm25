@@ -1,16 +1,15 @@
 """Minimal, self-contained BM25 ranker
 
-This follows naturally from the sublinear TF-IDF discussion in RANKING.md.
-
 Key ideas (why BM25?):
 - Still uses IDF to down-weight common terms (same spirit as TF-IDF)
 - Uses a saturating TF factor so repetition helps but with diminishing returns
 - Adds document-length normalization so long docs don't get an unfair boost
 
 Formula (Okapi BM25):
-  score(d, q) = sum over matched terms t of
-          IDF(t) * ((tf(t,d) * (k1 + 1)) / (tf(t,d) + k1 * (1 - b + b * dl/avgdl)))
-
+    BM25(q, d) = sum over matched terms t of
+          idf(t) x [((k1 + 1)) / (tf(t,d) + k1 x C)] x tf(t,d)
+    idf(t) = ln(((N - df + 0.5) / (df + 0.5)) + 1)
+    C = (1 - b) + b x (dl / avgdl)
 Where:
 - tf(t, d) is the term frequency of t in doc d
 - dl is the length of document d (token count after preprocessing)
@@ -18,7 +17,6 @@ Where:
 - k1 controls TF saturation (typical ~1.2 to 2.0)
 - b controls length normalization (0 = none, 1 = full), typical 0.75
 - IDF is Robertson–Sparck Jones style; we add +1 inside log to keep it positive
-
 """
 
 from __future__ import annotations

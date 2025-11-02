@@ -8,15 +8,15 @@ Before you start reading, make sure that the server is running:
 uv run uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
-This is the query we'll be using through out:
+This is the query we'll be using throughout:
 
-```bash
-Can the president of the USA rule over the constitution?
+```text
+Can the president of the USA overrule the constitution?
 ```
 
 Keep in mind that after applying the same preprocessing steps we applied to the document, the query looks like this:
-```bash
-["sident", "usa", "rule", "over", "constitu", "?"]
+```json
+["sident", "usa", "rule", "constitu", "?"]
 ```
 
 To run the query against any scoring endpoint:
@@ -29,9 +29,9 @@ Just replace `tf_ranking` with your desired ranking endpoint.
 
 ## Fetching all postings that match the query
 
-Recall that our position index looks like this:
+Recall that our positional index looks like this:
 
-```bash
+```json
  "like": {
         "3": [
             12
@@ -45,16 +45,16 @@ Recall that our position index looks like this:
 ...
 ```
 
-We call each term dictionary object a posting. For instance, `{"4": [2]}` is the posting for the term `rule`.
+Each term maps to a postings list (doc_id -> positions). Each entry in that list is a posting. For example, for term `rule`, the entry `"4": [2]` is a posting indicating document 4 with a hit at position 2.
 
-So fetching all documents for the query is simply a matter of
+So fetching all documents for the query is simply a matter of:
 
-1) looking up the positional inverted index and fetching the posting for each matched term in the query.
-2) taking the union of all document ids of the feteched postings
+1) Looking up the positional inverted index and fetching the posting for each matched term in the query.
+2) Taking the union of all document IDs of the fetched postings.
 
 Here's a deliberately verbose way of doing this:
 
-```bash
+```python
 postings = []
 for term in processed_query:
     if term in pii:
@@ -68,19 +68,21 @@ for term_postings in postings:
         relevant_docs.update(docs.keys())
 ```
 
-This is what the `/fetch_all_docs` end point does. You can ping the end point like so:
+This is what the `/fetch_all_docs` endpoint does. You can ping the endpoint like so:
 
 ```bash
 curl -s "http://127.0.0.1:8000/fetch_all_docs?query=Can%20the%20president%20of%20the%20USA%20overrule%20the%20constitution%3F" | python -m json.tool
 ```
 
-Now if you actually look at the results from `/fetch_all_docs`, the first result (due to final sorting by doc_id) is doc_id "2":
+Now if you actually look at the results from `/fetch_all_docs`, the first result (due to final sorting by doc_id) is doc_id "10":
 
-```bash
+```json
 {"10": "Do unborn children have natural rights?"}
 ```
 
-As you can see, doc_id "10" is in fact not relevant to the query at all. It got fetched because it shares the term `?` with the query. So fetching all docs with at least one query term aligns poorly with the user's expectations of relevance.
+As you can see, doc_id "10" is in fact not relevant to the query at all. It got fetched because it shares the term `?` with the query. So fetching all docs with at least one query term aligns poorly with the user's expectations of relevance. 
+
+Note also in standard search settings, we will usually strip `?` alongside other non-alphanumerics as part of preprocessing. We have a small set of short documents. So some punctuation marks - i.e., `. , : ; ! ?` - are indexed as individual tokens.
 
 ## Ranking with term frequency
 
@@ -88,14 +90,14 @@ Enter term frequency (TF). The idea is simple: if a document contains a query te
 
 This is what the `/tf_ranking` endpoint does. With the current documents, the first ranked result is doc_id "4" and the second ranked result is doc_id "5":
 
-```bash
-{"4": "Donald Trump is the 45th President of the USA. He has headed the USA since November 2024. Leftists in the USA don't like Trump. Trump was born iin New York, USA."}
+```json
+{"4": "Donald Trump is the 45th President of the USA. He has headed the USA since November 2024. Leftists in the USA don't like Trump. Trump was born in New York, USA."}
 {"5": "The President of the USA can overrule the constitution. It has been this way since the country's founding."}
 ```
 
 TF scoring for doc_id "5" is shown below:
 
-- Query (processed): `["sident", "usa", "rule", "over", "constitu", "?"]`
+- Query (processed): `["sident", "usa", "rule", "constitu", "?"]`
 
 
 For doc_id "4":
@@ -112,7 +114,7 @@ $$
 \mathrm{TF}(q, 5) = 1 + 1 + 1 + 1 = 4
 $$
 
-So relevance scoring purely on term frequency ranks document "4" over "5"
+So relevance scoring purely on term frequency ranks document "4" over "5".
 
 You can verify this by running:
 
@@ -142,17 +144,19 @@ Without smoothing, it is just $\ln\!\left(\frac{N}{\mathrm{df}(t)}\right)$ (defi
 - denominator +1: prevents division by zero when $\mathrm{df}(t)=0$ (term not observed) and is the other half of Laplace smoothing.
 - outer +1 (the addition outside the log): shifts the value upward so IDF is strictly positive (>= 1) even when $\mathrm{df}(t)=N$ (term appears in every document), ensuring every matched term contributes a small, non-zero weight.
 
-To get the relevance score of document against a query based on IDF, we simply sum over $\mathrm{idf}(t)$ for each matched term $t$:
+To get the relevance score of a document against a query based on IDF, we simply sum over $\mathrm{idf}(t)$ for each matched term $t$:
 
 $$
-\mathrm{IDF}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)} \mathrm{idf}(t)
+\mathrm{IDF}(q, d) = \sum_{t \in (q \cap d)} \mathrm{idf}(t)
 $$
 
-Where $(q\,\cap\,d)$ denotes the set of unique query terms that appear in document $d$.
+Where $(q \cap d)$ denotes the set of unique query terms that appear in document $d$.
 
 With the current index ($N = 10$), the query terms have these document frequencies ($\mathrm{df}$) and IDFs:
 - df: "sident" $= 2$, "usa" $= 2$, "rule" $= 1$, "constitu" $= 2$, "?" $= 2$
 - idf: "sident" $\approx 2.2993$, "usa" $\approx 2.2993$, "rule" $\approx 2.7047$, "constitu" $\approx 2.2993$
+
+Note that while I showed "?" $= 2$ in df, I ignored "?" in idf. This is so because "?" is not a term that appears in the documents 4 or 5, so it does not affect the idf scores. In other words, "?" is not a matched term $t$. 
 
 Considering our top two contenders from TF scoring:
 
@@ -166,7 +170,7 @@ $$
 \text{IDF}(q, 5) \approx 2.2993 + 2.2993 + 2.7047 + 2.2993 = 9.6026
 $$
 
-Great: doc_id "5" outranks doc_id "4" under IDF because it convers more query terms and also contains the more discriminative term “rule” which only appears in the corpus once, while doc "4" mainly repeats the common term “usa”.
+Great: doc_id "5" outranks doc_id "4" under IDF because it covers more query terms and also contains the more discriminative term “rule”, which only appears in the corpus once, while doc "4" mainly repeats the common term “usa”.
 
 You can verify this by running:
 ```bash
@@ -178,7 +182,7 @@ While IDF produces the correct ranking in this particular case, it is still limi
 
 ## Ranking with TF-IDF
 
-In practice, we want a balance between TF and IDF. So, we multiply the two. So the contribution of a single matched term $t$ to the relevance score of a document is:
+In practice, we want a balance between TF and IDF. So we multiply the two. The contribution of a single matched term $t$ to the relevance score of a document, therefore:
 
 $$
 \mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \mathrm{tf}(t, d)
@@ -218,7 +222,7 @@ Doc "5":
 
 Doc "4":
 - sident: $(1)\times 2.2993 = 2.2993$
-- usa: $\big(1 + \ln (4)) \times 2.993  \approx 2.3863 \times 2.2993 \approx 5.4868$
+- usa: $\big(1 + \ln(4)\big) \times 2.2993  \approx 2.3863 \times 2.2993 \approx 5.4868$
 - Total $2.2993 + 5.4868 \approx 7.7861$
 
 Result with sublinear TF:
@@ -226,7 +230,7 @@ Result with sublinear TF:
 
 But, even with sublinear TF, TF-IDF is still limited:
 
-- It lacks principled document length normalization. Longer documents tend to accumulate more matching term occurrences (i.e., raw TF) and more repetitions and can be unfairly favored or penalized depending on corpus mix.
+- It lacks principled document length normalisation. Longer documents tend to accumulate more matching term occurrences (i.e., raw TF) and more repetitions and can be unfairly favoured or penalised depending on corpus mix.
 - It does not saturate TF strongly enough. Repeating the same term keeps boosting the score without a firm cap tied to document length.
 - It has no tunable knobs to trade off repetition vs coverage across different corpora and query styles.
 
@@ -290,7 +294,7 @@ $$
 \lim_{k_1 \to 0} \frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \approx \frac{1}{\mathrm{tf}(t, d)}
 $$
 
-That is, as $k_1 \to 0$ the damping effect gets severe: the scaling factor actully cancels out $\mathrm{tf}(t, d)$ altogether. In other words, a small $k_1$ makes $\mathrm{contrib}(t, d) \approx \mathrm{idf}(t)$.
+That is, as $k_1 \to 0$ the damping effect gets severe: the scaling factor actually cancels out $\mathrm{tf}(t, d)$ altogether. In other words, a small $k_1$ makes $\mathrm{contrib}(t, d) \approx \mathrm{idf}(t)$.
 
 ### BM25 calculation
 
@@ -309,6 +313,8 @@ $$
 
 This is not all that different from the earlier $\mathrm{idf}(t)$ formula. $+0.5$ and $+1$ in this equation play analogous roles to the $+1$ in the earlier equation. This particular form of $\mathrm{idf}(t)$, derived from work in probability, is verified to be better in empirical studies.
 
+Note: In the earlier IDF/TF-IDF sections, we used the smoothed IDF $\ln\!\left(\frac{N+1}{df(t)+1}\right) + 1$. For BM25, it's common to use the probabilistic IDF above; both serve to downweight common terms and upweight rarer ones.
+
 To score the relevance of a document under BM25 weighting against a given query:
 
 $$
@@ -326,7 +332,7 @@ Inverse document frequencies for the same terms under new formula above:
 
 - $sident ≈ 1.4816; usa ≈ 1.4816; constitu ≈ 1.4816; rule ≈ 1.9924$
 
-Document lengths
+Document lengths:
 - $dl(4) = 26; dl(5) = 12; avgdl = 9.0$
 
 Constants:
@@ -339,7 +345,7 @@ $$
 C = 1 − b + b × \frac{dl}{avgdl} = 1 - 0.75 + 0.75 × \frac{26}{9} ≈ 2.4167
 $$
 
-Matched terms in 4 are `["sident", "usa]`. Let's calculate the BM25 weighted tf(t, 4) for both matched terms.
+Matched terms in 4 are `["sident", "usa"]`. Let's calculate the BM25-weighted $\mathrm{tf}(t, 4)$ for both matched terms.
 
 - "sident":
 
@@ -355,7 +361,7 @@ $$
 So the relevance score of document "4" against the query becomes:
 
 $$
-BM25(q, 4) \approx \mathrm{idf}(`sident') \times \text{bm25\_weighted\_tf}(`sident', 4) + \mathrm{idf}(`sident') \times \text{bm25\_weighted\_tf}(`usa', 4)
+BM25(q, 4) \approx \mathrm{idf}(`sident') \times \text{bm25\_weighted\_tf}(`sident', 4) + \mathrm{idf}(`usa') \times \text{bm25\_weighted\_tf}(`usa', 4)
 $$
 $$
 BM25(q, 4) \approx 1.4816 \times 0.5641 + 1.4816 \times 1.2754 \approx 2.7252
@@ -368,7 +374,7 @@ $$
 BM25(q, 5) = 5.6648
 $$
 
-So we can be happy. BM25 ranks doc 5 above doc 4 (5.6648 > 2.7254). Repetition of a common term in doc 4 ("usa") saturates and is further tempered by length normalization, while doc 5’s broader coverage of discriminative terms (including rule) is rewarded.
+We can be happy: with our defaults for $k_1$ and $b$, BM25 ranks doc 5 above doc 4 (5.6648 > 2.7254). Repetition of a common term in doc 4 ("usa") saturates and is further tempered by length normalisation, while doc 5’s broader coverage of discriminative terms (including rule) is rewarded.
 
 To verify, run:
 ```bash
