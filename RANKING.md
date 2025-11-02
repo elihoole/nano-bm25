@@ -180,7 +180,7 @@ This is where BM25 enters the picture. BM25 is simply an extension of the sublin
 Under BM25, we weight TF with a damping factor for repetition as well as a correction factor for document length. The contribution of a matched term in a document to the relevance score looks like this:
 
 $$
-\mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \frac{(k_1 + 1)}{\mathrm{tf}(t, d) + k_1 \times C} \times \mathrm{tf}(t, d)
+\mathrm{contrib}(t, d) = \mathrm{idf}(t) \times [\frac{(k_1 + 1)}{\mathrm{tf}(t, d) + k_1 \times C}] . \mathrm{tf}(t, d)
 $$
 
 Where
