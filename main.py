@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
 
+from bm25 import rank_with_bm25
 from query import process_query
 from tfidf_ranker import (
     rank_with_idf,
@@ -211,6 +212,46 @@ def sublinear_tf_idf_ranking(query: str = Query(..., min_length=1)):
         "status": "ok",
         "query": query,
         "processed_query": processed_query,
+        "ranked_documents": ranked_docs,
+    }
+
+
+@app.get("/bm25_ranking")
+def bm25_ranking(
+    query: str = Query(..., min_length=1),
+    k1: float = Query(1.2, ge=0.0),
+    b: float = Query(0.75, ge=0.0, le=1.0),
+):
+    """
+    Endpoint to rank documents using BM25 with tunable k1 and b.
+
+    Example:
+      /bm25_ranking?query=...&k1=1.2&b=0.75
+    """
+    pii = getattr(app.state, "pii", None)
+
+    if pii is None:
+        if not INDEX_PATH.exists():
+            raise HTTPException(
+                status_code=500,
+                detail=f"Index not found at {INDEX_PATH}. Generate it first (run index.py).",
+            )
+        pii = load_pii(INDEX_PATH)
+        app.state.pii = pii
+
+    processed_query = process_query(query)
+
+    try:
+        ranked_docs = rank_with_bm25(processed_query, pii, k1=k1, b=b)
+    except Exception as e:
+        logger.error(f"Error occurred while ranking documents: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    return {
+        "status": "ok",
+        "query": query,
+        "processed_query": processed_query,
+        "params": {"k1": k1, "b": b},
         "ranked_documents": ranked_docs,
     }
 

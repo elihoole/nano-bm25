@@ -1,6 +1,10 @@
 # How ranking works
 
-We'll use a single query to explain how retrieval works end-to-end.
+We'll use a single query to explain how retrieval works end-to-end. Before you start reading, make sure that the server is running:
+
+```bash
+uv run uvicorn main:app --host 127.0.0.1 --port 8000
+```
 
 ## Query in question
 
@@ -17,7 +21,7 @@ After applying the same preprocessing steps we applied to the document, the quer
 
 ## Fetching all postings that match the query
 
-Remember that our position index looks like this:
+Recall that our position index looks like this:
 
 ```bash
  "like": {
@@ -66,7 +70,7 @@ Now if you actually look at the results from /fetch_all_docs, the first result (
 {"2": "My objections to the current constitution of the board was overruled."}
 ```
 
-As you can see, doc_id "1" is not super relevant to the query. It is about the the make up --aka, constitution -- of an institutional board not about the constitution of the USA. So fetching all docs with at least one query term (and, then, naively sorting my doc_id or similar) aligns poorly with the user's expectations of relevance.
+As you can see, doc_id "1" is not super relevant to the query. It is about the the make up --aka, constitution -- of an institutional board not about the constitution of the USA. So fetching all docs with at least one query term (and, then, naively sorting by doc_id or similar) aligns poorly with the user's expectations of relevance.
 
 We need a better signal for relevance. Enter term frequency (TF). The idea is simple: if a document contains a query term more often than other documents, it’s more likely to be about that term. So we score documents by counting how many times the query terms appear and prefer the ones with higher counts.
 
@@ -90,6 +94,12 @@ For doc_id "5":
 - Document (matched tokens, with counts): {"sident": 1, "usa": 1, "rule": 1, "constitu": 1}
 - Score("5") = 1 + 1 + 1 + 1 = 4
 
+You can verify this by running
+
+```bash
+curl -s "http://127.0.0.1:8000/tf_ranking?query=Can%20the%20president%20of%20the%20USA%20overrule%20the%20constitution%3F" | python -m json.tool
+```
+
 ## Ranking with inverse document frequency
 
 Between "4" and "5", document "5" is much more relevant to the query. But term frequency scoring, on its own, does not surface "5" as the top document because of the following reasons:
@@ -98,20 +108,29 @@ Between "4" and "5", document "5" is much more relevant to the query. But term f
 
 - Redundancy can overshadow coverage and context: A document that repeats one query term many times can outrank one that mentions all query terms once, because TF ignores cross-term balance, proximity/co-occurrence, and length normalization.
 
-The antidote to term frequency's weaknesses is inverse document frequency (IDF), which down-weights common terms and boosts rarer, more discriminative ones. Our `/idf_ranking` endpoint intentionally scores by IDF only (no TF multiplier):
+The antidote to term frequency's weaknesses is inverse document frequency (IDF), which down-weights common terms and boosts rarer, more discriminative ones. This is what our `/idf_ranking` endpoint does:
 
-- idf(t) = log((N + 1) / (df(t) + 1)) + 1
-- IDF score(q, d) = sum over unique matched t in q of idf(t)
+$$
+\mathrm{idf}(t) = \ln\!\left(\frac{N + 1}{\mathrm{df}(t) + 1}\right) + 1
+$$
 
-With the current index (N = 10), the query terms have these document frequencies (df) and IDFs (terms not present in any document—like "over" here—don’t contribute to any document’s score):
-- df: sident = 2, usa = 2, rule = 1, constitu = 2, ? = 2
-- idf: sident ≈ 2.2993, usa ≈ 2.2993, rule ≈ 2.7047, constitu ≈ 2.2993
+$$
+	ext{IDFScore}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
+$$
+
+Where $(q\,\cap\,d)^{\*}$ denotes the set of unique query terms that appear in document $d$.
+
+With the current index ($N = 10$), the query terms have these document frequencies ($\mathrm{df}$) and IDFs:
+- df: "sident" $= 2$, "usa" $= 2$, "rule" $= 1$, "constitu" $= 2$, "?" $= 2$
+- idf: "sident" $\approx 2.2993$, "usa" $\approx 2.2993$, "rule" $\approx 2.7047$, "constitu" $\approx 2.2993$
 
 Effects on our two top contenders:
-- Doc 5 matches {sident, usa, rule, constitu} → idf(q, 5) ≈ 2.2993 + 2.2993 + 2.7047 + 2.2993 = 9.6026
-- Doc 4 matches {sident, usa} → idf(q, 4) ≈ 2.2993 + 2.2993 = 4.5986
+- Doc 4 matches {"sident", "usa"} → $\text{IDFScore}(q, 4) \approx 2.2993 + 2.2993 = 4.5986$
+- Doc 5 matches {"sident", "usa", "rule", "constitu"} → $\text{IDFScore}(q, 5) \approx 2.2993 + 2.2993 + 2.7047 + 2.2993 = 9.6026$
 
-Result: doc_id "5" outranks doc_id "4" under IDF because it covers more discriminative terms (including the rarer “rule” and “constitu”), while doc 4 mainly repeats the common term “usa”.
+Result: doc_id "5" outranks doc_id "4" under IDF because it covers more discriminative terms (including the rarer “rule” and “constitu”), while doc "4" mainly repeats the common term “usa”.
+
+While IDF produces the correct ranking here, it is limited on its own as it completely ignores term frequency which is an essential measure of relative relevance between documents.
 
 ## Ranking with TF-IDF
 
@@ -119,65 +138,94 @@ In practice, we want a balance between TF and IDF. So, we multiply the two.
 
 Definition:
 
-- score(d, q) = sum over matched terms t of tf(t, d) × idf(t)
+$$
+\mathrm{score}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)} \mathrm{tf}(t, d)\,\mathrm{idf}(t)
+$$
 
-Doc "5" (tf: sident=1, usa=1, rule=1, constitu=1):
-- 1×2.2993 + 1×2.2993 + 1×2.7047 + 1×2.2993 = 9.6026
 
 Doc "4" (tf: sident=1, usa=4):
 - 1×2.2993 + 4×2.2993 = 11.4965
 
-But, as you can see, through sheer repitition of "usa", doc_id "4" out ranks "5" in TF-IDF scoring. How do we fix this? Notice that
+Doc "5" (tf: sident=1, usa=1, rule=1, constitu=1):
+- 1×2.2993 + 1×2.2993 + 1×2.7047 + 1×2.2993 = 9.6026
 
-Sublinear TF (1 + ln(tf)) to reduce repetition dominance. As you know `ln` grows quickly at first and then flattens, so the first occurrence of a query term in a document contributes most and additional repeats add diminishing gains.
+
+But, as you can see, through sheer repetition of "usa", doc_id "4" outranks "5" in TF-IDF scoring. You can try the `tf_idf_ranking` endpoint for verification.
+
+## Ranking with SublinearTF-IDF
+
+How do we fix this? A simple fix is sublinear TF $\big(1 + \ln(\mathrm{tf})\big)$ to reduce repetition dominance. As you know, $\ln$ grows quickly at first and then flattens, so under sublinear TF, the first occurrence of a query term in a document contributes most and additional repeats add diminishing gains.
 
 Doc "5":
-- Same as above (all tf=1) → 9.6026
+- Same as above (all $\mathrm{tf}=1$) → $9.6026$
 
 Doc "4":
-- sident: (1)×2.2993 = 2.2993
-- usa: (1 + ln 4 ≈ 2.3863)×2.2993 ≈ 5.4868
-- Total ≈ 7.7861
+- sident: $\;(1)\times 2.2993 = 2.2993$
+- usa: $\;\big(1 + \ln 4 \approx 2.3863\big)\times 2.2993 \approx 5.4868$
+- Total $\approx 7.7861$
 
 Result with sublinear TF:
 - doc "5" > doc "4", reflecting better term coverage and discriminative matches.
 
 ## Ranking with BM25
 
-Even with sublinear TF, TF-IDF is still limited:
+But, even with sublinear TF, TF-IDF is still limited:
 
-- It lacks principled document length normalization. Longer documents tend to accumulate more evidence (and more repetitions) and can be unfairly favored or penalized depending on corpus mix.
+- It lacks principled document length normalization. Longer documents tend to accumulate more matching term occurrences (i.e., raw TF) and more repetitions and can be unfairly favored or penalized depending on corpus mix.
 - It does not saturate TF strongly enough. Repeating the same term keeps boosting the score without a firm cap tied to document length.
 - It has no tunable knobs to trade off repetition vs coverage across different corpora and query styles.
 
-We’ll use:
-- idf(t) = ln(1 + (N - df(t) + 0.5) / (df(t) + 0.5))
-- score(d, q) = Σ over matched t [ idf(t) × (tf(t, d) × (k1 + 1)) / (tf(t, d) + k1 × (1 − b + b × dl/avgdl)) ]
-- Parameters: k1 = 1.2, b = 0.75
+This is where BM25 enters the picture. BM25 is simply an extension of the sublinear TF idea which accounts for document length.
 
-Numbers for this index and query terms:
-- N = 10
-- df: sident = 2, usa = 2, rule = 1, constitu = 2
-- idf: sident ≈ 1.4816, usa ≈ 1.4816, constitu ≈ 1.4816, rule ≈ 1.9924
-- Lengths (post-processing, approximate): dl(4) ≈ 31, dl(5) ≈ 18, avgdl ≈ 20
-- K(d) = k1 × (1 − b + b × dl/avgdl)
-    - K(4) ≈ 1.2 × (0.25 + 0.75 × 31/20) = 1.695
-    - K(5) ≈ 1.2 × (0.25 + 0.75 × 18/20) = 1.11
+Under BM25, we weight TF with a damping factor for repetition as well as a correction factor for document length. The contribution of a matched term in a document to the relevance score looks like this:
 
-Doc 4 (matches: sident=1, usa=4)
-- sident: contrib = 1.4816 × (1 × 2.2) / (1 + 1.695) = 1.4816 × 0.8161 ≈ 1.2095
-- usa: contrib = 1.4816 × (4 × 2.2) / (4 + 1.695) = 1.4816 × 1.5459 ≈ 2.2909
-- Score(4) ≈ 1.2095 + 2.2909 = 3.5004
+$$
+\mathrm{contrib}(t, d) = \mathrm{idf}(t)\,\frac{(k_1 + 1)\,\mathrm{tf}(t, d)}{\mathrm{tf}(t, d) + k_1\,C}
+$$
 
-Doc 5 (matches: sident=1, usa=1, rule=1, constitu=1)
-- Common TF factor for tf=1: (1 × 2.2) / (1 + 1.11) = 1.0427
-- sident: 1.4816 × 1.0427 ≈ 1.5448
-- usa: 1.4816 × 1.0427 ≈ 1.5448
-- constitu: 1.4816 × 1.0427 ≈ 1.5448
-- rule: 1.9924 × 1.0427 ≈ 2.0777
-- Score(5) ≈ 1.5448 + 1.5448 + 1.5448 + 2.0777 = 6.7121
+Where
 
-Result and intuition:
-- BM25 ranks doc 5 above doc 4 (6.71 > 3.50).
-- Repetition of a common term in doc 4 saturates and is further tempered by length normalization, while doc 5’s broader coverage of discriminative terms (including rule) is rewarded.
-- This demonstrates why BM25’s tunable saturation and length normalization outperform even sublinear TF-IDF.
+$$
+C = (1 - b) + b\,\frac{dl}{\overline{dl}}
+$$
+
+$dl$ = document length, $\overline{dl}$ = average document length, and $k_1, b$ are constants.
+
+To understand BM25, we need to look at the factor that is scaling $\mathrm{tf}(t, d)$. Namely:
+
+$$
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1\,C}
+$$
+
+Let's unpack this.
+
+C here is a document length correction.
+
+$$
+C = (1 - b) + b\,\frac{dl}{\overline{dl}}
+$$
+
+At a glance, you can see that the larger the document length compared to the average length of the corpus, the greater the $C$ term, resulting in greater penalization of $\mathrm{tf}(t, d)$'s contribution (notice that it is part of the denominator of the scaling factor). The constant $b$ is a tunable knob: if you set it to $0$, BM25 does not apply any document length correction to $\mathrm{tf}(t, d)$; the larger the $b$, the greater the length penalty.
+
+$k_1$ is the repetition damping parameter. To understand what $k_1$ does, let's think in limits.
+
+As $k_1$ tends to infinity,
+
+$$
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \;\to\; \frac{1 + 1/k_1}{\mathrm{tf}(t, d)/k_1 + C} \;\to\; \frac{1}{C}
+$$
+
+That is, as $k_1 \to \infty$ the damping effect on repetition is progressively removed, essentially preserving TF but for a correction for document length, making $\mathrm{contrib}(t, d)$ for a given term a linear TF–IDF contribution.
+
+As $k_1$ tends to $0$,
+
+$$
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \;\to\; \frac{1}{\mathrm{tf}(t, d)}
+$$
+
+That is, as $k_1 \to 0$ the damping effect gets severe, essentially canceling out $\mathrm{tf}(t, d)$. This makes $\mathrm{contrib}(t, d) \approx \mathrm{idf}(t)$.
+
+
+
+
+

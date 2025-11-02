@@ -106,19 +106,42 @@ def rank_with_bm25(
             term_idf[term] = idf
     print("Term IDFs:", term_idf)
 
+    # Calculate document length normalization factors for each document
+    Cs = {}
+    for doc_id, dl in doc_lengths.items():
+        Cs[doc_id] = 1 - b + b * (dl / avgdl if avgdl > 0 else 0)
+
+    print(
+        "Length normalization factors (C):",
+        {doc_id: f"{c:.4f}" for doc_id, c in Cs.items()},
+    )
+
     # BM25 scoring
     doc_scores = defaultdict(float)
+    bm25_weighted_tfs = defaultdict(float)
     for doc_id, tf_map in doc_term_freq.items():
+        # skip doc_id other than 4 and 5 for debugging
+        # if doc_id not in ["4", "5"]:
+        #     continue
         dl = doc_lengths.get(doc_id, 0) or 0
         for term, tf in tf_map.items():
             idf = term_idf.get(term)
             if idf is None:
                 continue
-            # Saturating TF with length normalization
-            denom = tf + k1 * (1 - b + b * (dl / avgdl if avgdl > 0 else 0))
-            score_t = idf * ((tf * (k1 + 1)) / denom)
+            # length normalization correction
+            denom = tf + k1 * Cs[doc_id]
+            bm25_weighted_tf = (tf * (k1 + 1)) / denom
+            bm25_weighted_tfs[(doc_id, term)] = bm25_weighted_tf
+            score_t = idf * bm25_weighted_tf
             doc_scores[doc_id] += score_t
+            # print(
+            #     "Doc {}, Term '{}': denom={}, c={:.4f}, tf={}, idf={:.4f}, bm25_weighted_tf={:.4f}, score_t={:.4f}".format(
+            #         doc_id, term, denom, Cs[doc_id], tf, idf, bm25_weighted_tf, score_t
+            #     )
+            # )
+            # print("---")
 
+    print("BM25 Weighted TFs:", dict(bm25_weighted_tfs))
     print("Document BM25 Scores:", dict(doc_scores))
 
     ranked_docs = sorted(doc_scores.items(), key=lambda item: item[1], reverse=True)
