@@ -96,11 +96,11 @@ TF scoring for doc_id "5" is shown below:
 
 For doc_id "4":
 - Document (matched tokens, with counts): `{"sident": 1, "usa": 4}`
-- $\mathrm{tf}(q, "4") = 1 + 4 = 5$
+- $\mathrm{TF}(q, "4") = 1 + 4 = 5$
 
 For doc_id "5":
 - Document (matched tokens, with counts): `{"sident": 1, "usa": 1, "rule": 1, "constitu": 1}`
-- $\mathrm{tf}(q, "5") = 1 + 1 + 1 + 1 = 4$
+- $\mathrm{TF}(q, "5") = 1 + 1 + 1 + 1 = 4$
 
 You can verify this by running
 
@@ -124,10 +124,10 @@ $$
 \mathrm{idf}(t) = \ln\left(\frac{N + 1}{\mathrm{df}(t) + 1}\right) + 1
 $$
 
-More simply, it is just $ln(\frac{N}{\mathrm{df}{t}}$. The $1$ s simply smooth out division by zero and other possible weird behaviour.
+More simply, it is just $ln(\frac{N}{\mathrm{df}{t}})$. The $1$ s simply smooth out division by zero and other possible weird behaviour.
 
 $$
-\mathrm{IDFScore}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
+\mathrm{IDF}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
 $$
 
 Where $(q\,\cap\,d)^{\*}$ denotes the set of unique query terms that appear in document $d$.
@@ -146,12 +146,15 @@ While IDF produces the correct ranking here, it is limited on its own as it comp
 
 ## Ranking with TF-IDF
 
-In practice, we want a balance between TF and IDF. So, we multiply the two.
-
-Definition:
+In practice, we want a balance between TF and IDF. So, we multiply the two. So the contribution of a single matched term $t$ to the relevance score of a document is:
 
 $$
-\mathrm{score}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)} \mathrm{tf}(t, d) \times \mathrm{idf}(t)
+\mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \mathrm{tf}(t, d)
+$$
+
+Thus, the relevance score of a document against the query is:
+$$
+\mathrm{score}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)}  \mathrm{idf}(t) \times \mathrm{tf}(t, d)
 $$
 
 
