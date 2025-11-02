@@ -126,6 +126,9 @@ $$
 
 More simply, it is just $ln(\frac{N}{\mathrm{df}{t}})$. The $1$ s simply smooth out division by zero and other possible weird behaviour.
 
+
+So to get the relevance score of document against a query based on IDF, we simply sum over $\mathrm{idf}(t)$ for each matched term $t$:
+
 $$
 \mathrm{IDF}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
 $$
