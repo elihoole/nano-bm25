@@ -284,6 +284,7 @@ The constant $b$ in $C$ is a tunable knob: if you set it to $0$, BM25 does not a
 $k_1$ is the repetition damping parameter. To understand what $k_1$ does, it is instructive to think in limits.
 
 As $k_1$ tends to infinity,
+
 $$
 \lim_{k_1 \to \infty} \frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \to \lim_{k_1 \to \infty} \frac{1 + \frac{1}{k_1}}{\frac{\mathrm{tf}(t, d)}{k_1} + C} \approx \frac{1}{C}
 $$
