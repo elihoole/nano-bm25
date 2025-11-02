@@ -161,11 +161,13 @@ Note that while I showed "?" $= 2$ in df, I ignored "?" in idf. This is so becau
 Considering our top two contenders from TF scoring:
 
 - Doc 4 matches `["sident", "usa"]`
+
 $$
 \text{IDF}(q, 4) \approx 2.2993 + 2.2993 = 4.5986
 $$
 
 - Doc 5 matches `["sident", "usa", "rule", "constitu"]`
+
 $$
 \text{IDF}(q, 5) \approx 2.2993 + 2.2993 + 2.7047 + 2.2993 = 9.6026
 $$
