@@ -85,7 +85,7 @@ def fetch_all_docs(query: str = Query(..., min_length=1)):
         "number_of_postings_found": len(postings),
         "postings": postings,
         # Expose union of docs across all query term postings
-        "relevant_documents": sorted(relevant_docs),
+        "relevant_documents": relevant_docs,
     }
 
 
