@@ -5,15 +5,17 @@ We'll use a single query to explain how retrieval works end-to-end. Before you s
 ```bash
 uv run uvicorn main:app --host 127.0.0.1 --port 8000
 ```
+\mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \frac{(k_1 + 1) \times \mathrm{tf}(t, d)}{\mathrm{tf}(t, d) + k_1 \times C}
 
+$$
 ## Query in question
 
 This is the query:
 
-```bash
+C = (1 - b) + b\,\frac{dl}{\overline{dl}}
 Can the president of the USA rule over the constitution?
 ```
-
+$dl$ = document length, $\overline{dl}$ = average document length, and $k_1, b$ are constants.
 After applying the same preprocessing steps we applied to the document, the query looks like this:
 ```bash
 ["sident", "usa", "rule", "over", "constitu", "?"]
@@ -185,10 +187,10 @@ $$
 Where
 
 $$
-C = (1 - b) + b\,\frac{dl}{\overline{dl}}
+C = (1 - b) + b\,\frac{dl}{avgdl}
 $$
 
-$dl$ = document length, $\overline{dl}$ = average document length, and $k_1, b$ are constants.
+$dl$ = document length, $avgdl$ = average document length, and $k_1, b$ are constants.
 
 To understand BM25, we need to look at the factor that is scaling $\mathrm{tf}(t, d)$. Namely:
 
