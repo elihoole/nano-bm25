@@ -19,6 +19,14 @@ After applying the same preprocessing steps we applied to the document, the quer
 ["sident", "usa", "rule", "over", "constitu", "?"]
 ```
 
+To run the query against any scoring endpoint:
+
+```bash
+curl -s "http://127.0.0.1:8000/tf_ranking?query=Can%20the%20president%20of%20the%20USA%20overrule%20the%20constitution%3F" | python -m json.tool
+```
+
+Just replace `tf_ranking` with your desired ranking endpoint.
+
 ## Fetching all postings that match the query
 
 Recall that our position index looks like this:
@@ -83,16 +91,16 @@ This is what the `/tf_ranking` endpoint does. With the current documents, the fi
 
 TF scoring for doc_id "5" is shown below:
 
-- Query (processed): ["sident", "usa", "rule", "over", "constitu", "?"]
+- Query (processed): `["sident", "usa", "rule", "over", "constitu", "?"]`
 
 
 For doc_id "4":
-- Document (matched tokens, with counts): {"sident": 1, "usa": 4}
-- Score("4") = 1 + 4 = 5
+- Document (matched tokens, with counts): `{"sident": 1, "usa": 4}`
+- $Score("4") = 1 + 4 = 5$
 
 For doc_id "5":
-- Document (matched tokens, with counts): {"sident": 1, "usa": 1, "rule": 1, "constitu": 1}
-- Score("5") = 1 + 1 + 1 + 1 = 4
+- Document (matched tokens, with counts): `{"sident": 1, "usa": 1, "rule": 1, "constitu": 1}`
+- $Score("5") = 1 + 1 + 1 + 1 = 4$
 
 You can verify this by running
 
@@ -108,14 +116,18 @@ Between "4" and "5", document "5" is much more relevant to the query. But term f
 
 - Redundancy can overshadow coverage and context: A document that repeats one query term many times can outrank one that mentions all query terms once, because TF ignores cross-term balance, proximity/co-occurrence, and length normalization.
 
-The antidote to term frequency's weaknesses is inverse document frequency (IDF), which down-weights common terms and boosts rarer, more discriminative ones. This is what our `/idf_ranking` endpoint does:
+The antidote to term frequency's weaknesses is inverse document frequency (IDF), which down-weights common terms and boosts rarer, more discriminative ones. This is what our `/idf_ranking` endpoint does.
+
+IDF contribution of a matched term is:
 
 $$
-\mathrm{idf}(t) = \ln\!\left(\frac{N + 1}{\mathrm{df}(t) + 1}\right) + 1
+\mathrm{idf}(t) = \ln\left(\frac{N + 1}{\mathrm{df}(t) + 1}\right) + 1
 $$
 
+More simply, it is just $ln(\frac{N}{\mathrm{df}{t}}$. The $1$ s simply smooth out division by zero and other possible weird behaviour.
+
 $$
-	ext{IDFScore}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
+\mathrm{IDFScore}(q, d) = \sum_{t\,\in\,(q\,\cap\,d)^{\*}} \mathrm{idf}(t)
 $$
 
 Where $(q\,\cap\,d)^{\*}$ denotes the set of unique query terms that appear in document $d$.
@@ -196,7 +208,7 @@ $dl$ = document length, $avgdl$ = average document length, and $k_1, b$ are cons
 
 </div>
 
-To understand BM25, we need to look at the factor that is scaling $\mathrm{tf}(t, d)$. Namely:
+To understand BM25, we need to look at the factor that is scaling $\mathrm{tf}(t, d)$ shown within the square brackets. Namely:
 
 $$
 \frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 \times C}
@@ -207,7 +219,7 @@ Let's unpack this.
 C here is a document length correction.
 
 $$
-C = (1 - b) + b \times \frac{dl}{\overline{dl}}
+C = (1 - b) + b \times \frac{dl}{avgdl}
 $$
 
 At a glance, you can see that the larger the document length compared to the average length of the corpus, the greater the $C$ term, resulting in greater penalization of $\mathrm{tf}(t, d)$'s contribution (notice that it is part of the denominator of the scaling factor). The constant $b$ is a tunable knob: if you set it to $0$, BM25 does not apply any document length correction to $\mathrm{tf}(t, d)$; the larger the $b$, the greater the length penalty.
