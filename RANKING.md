@@ -96,11 +96,11 @@ TF scoring for doc_id "5" is shown below:
 
 For doc_id "4":
 - Document (matched tokens, with counts): `{"sident": 1, "usa": 4}`
-- $Score("4") = 1 + 4 = 5$
+- $\mathrm{tf}(q, "4") = 1 + 4 = 5$
 
 For doc_id "5":
 - Document (matched tokens, with counts): `{"sident": 1, "usa": 1, "rule": 1, "constitu": 1}`
-- $Score("5") = 1 + 1 + 1 + 1 = 4$
+- $\mathrm{tf}(q, "5") = 1 + 1 + 1 + 1 = 4$
 
 You can verify this by running
 
