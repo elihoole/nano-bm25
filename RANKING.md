@@ -212,7 +212,7 @@ $k_1$ is the repetition damping parameter. To understand what $k_1$ does, let's 
 As $k_1$ tends to infinity,
 
 $$
-\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \to \frac{1 + 1/k_1}{\mathrm{tf}(t, d)/k_1 + C} \;\to\; \frac{1}{C}
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \to \frac{1 + 1/k_1}{\mathrm{tf}(t, d)/k_1 + C} \to\ \frac{1}{C}
 $$
 
 That is, as $k_1 \to \infty$ the damping effect on repetition is progressively removed, essentially preserving TF but for a correction for document length, making $\mathrm{contrib}(t, d)$ for a given term a linear TF–IDF contribution.
