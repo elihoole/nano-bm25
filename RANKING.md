@@ -80,7 +80,7 @@ Now if you actually look at the results from `/fetch_all_docs`, the first result
 {"10": "Do unborn children have natural rights?"}
 ```
 
-As you can see, doc_id "10" is in fact not relevant to the query at all. It got fetched because it shares the term `?` with the query. So fetching all docs with at least one query term aligns poorly with the user's expectations of relevance. 
+As you can see, doc_id "10" is in fact not relevant to the query at all. It got fetched because it shares the term `?` with the query. So fetching all docs with at least one query term aligns poorly with the user's expectations of relevance.
 
 Note also in standard search settings, we will usually strip `?` alongside other non-alphanumerics as part of preprocessing. We have a small set of short documents. So some punctuation marks - i.e., `. , : ; ! ?` - are indexed as individual tokens.
 
@@ -156,7 +156,7 @@ With the current index ($N = 10$), the query terms have these document frequenci
 - df: "sident" $= 2$, "usa" $= 2$, "rule" $= 1$, "constitu" $= 2$, "?" $= 2$
 - idf: "sident" $\approx 2.2993$, "usa" $\approx 2.2993$, "rule" $\approx 2.7047$, "constitu" $\approx 2.2993$
 
-Note that while I showed "?" $= 2$ in df, I ignored "?" in idf. This is so because "?" is not a term that appears in the documents 4 or 5, so it does not affect the idf scores. In other words, "?" is not a matched term $t$. 
+Note that while I showed "?" $= 2$ in df, I ignored "?" in idf. This is so because "?" is not a term that appears in the documents 4 or 5, so it does not affect the idf scores. In other words, "?" is not a matched term $t$.
 
 Considering our top two contenders from TF scoring:
 
@@ -164,8 +164,8 @@ Considering our top two contenders from TF scoring:
 $$
 \text{IDF}(q, 4) \approx 2.2993 + 2.2993 = 4.5986
 $$
-- Doc 5 matches `["sident", "usa", "rule", "constitu"]`
 
+- Doc 5 matches `["sident", "usa", "rule", "constitu"]`
 $$
 \text{IDF}(q, 5) \approx 2.2993 + 2.2993 + 2.7047 + 2.2993 = 9.6026
 $$
