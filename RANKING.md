@@ -160,8 +160,8 @@ Doc "5":
 - Same as above (all $\mathrm{tf}=1$) → $9.6026$
 
 Doc "4":
-- sident: $\;(1)\times 2.2993 = 2.2993$
-- usa: $\;\big(1 + \ln 4 \approx 2.3863\big)\times 2.2993 \approx 5.4868$
+- sident: $(1)\times 2.2993 = 2.2993$
+- usa: $\big(1 + \ln 4 \approx 2.3863\big)\times 2.2993 \approx 5.4868$
 - Total $\approx 7.7861$
 
 Result with sublinear TF:
@@ -181,6 +181,7 @@ Under BM25, we weight TF with a damping factor for repetition as well as a corre
 
 $$
 \mathrm{contrib}(t, d) = \mathrm{idf}(t) \times \frac{(k_1 + 1) \times \mathrm{tf}(t, d)}{\mathrm{tf}(t, d) + k_1 \times C}
+$$
 
 Where
 
@@ -211,7 +212,7 @@ $k_1$ is the repetition damping parameter. To understand what $k_1$ does, let's 
 As $k_1$ tends to infinity,
 
 $$
-\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \;\to\; \frac{1 + 1/k_1}{\mathrm{tf}(t, d)/k_1 + C} \;\to\; \frac{1}{C}
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \to \frac{1 + 1/k_1}{\mathrm{tf}(t, d)/k_1 + C} \;\to\; \frac{1}{C}
 $$
 
 That is, as $k_1 \to \infty$ the damping effect on repetition is progressively removed, essentially preserving TF but for a correction for document length, making $\mathrm{contrib}(t, d)$ for a given term a linear TF–IDF contribution.
@@ -219,7 +220,7 @@ That is, as $k_1 \to \infty$ the damping effect on repetition is progressively r
 As $k_1$ tends to $0$,
 
 $$
-\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \;\to\; \frac{1}{\mathrm{tf}(t, d)}
+\frac{k_1 + 1}{\mathrm{tf}(t, d) + k_1 C} \to \frac{1}{\mathrm{tf}(t, d)}
 $$
 
 That is, as $k_1 \to 0$ the damping effect gets severe, essentially canceling out $\mathrm{tf}(t, d)$. This makes $\mathrm{contrib}(t, d) \approx \mathrm{idf}(t)$.
