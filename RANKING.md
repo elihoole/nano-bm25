@@ -310,6 +310,7 @@ $$
 $$
 
 Here, we use the typical formula used for $\mathrm{idf}(t)$ in BM25 implementations:
+
 $$
 \mathrm{idf}(t) = \ln\left(\frac{N - df(t) + 0.5}{df(t) + 0.5} + 1\right)
 $$
@@ -326,9 +327,11 @@ $$
 
 
 Numbers for this index and query terms:
+
 - $N = 10$
 
 Document frequencies for matched terms:
+
 - $sident = 2; usa = 2; rule = 1; constitu = 2$
 
 Inverse document frequencies for the same terms under new formula above:
@@ -336,14 +339,17 @@ Inverse document frequencies for the same terms under new formula above:
 - $sident ≈ 1.4816; usa ≈ 1.4816; constitu ≈ 1.4816; rule ≈ 1.9924$
 
 Document lengths:
+
 - $dl(4) = 26; dl(5) = 12; avgdl = 9.0$
 
 Constants:
+
 - $k_1 = 1.2$; $b = 0.75$
 
 #### Relevance score of doc_id "4" against query: BM25(q, 4)
 
 Document length correction factor for "4" is:
+
 $$
 C = 1 − b + b × \frac{dl}{avgdl} = 1 - 0.75 + 0.75 × \frac{26}{9} ≈ 2.4167
 $$
@@ -355,6 +361,7 @@ Matched terms in 4 are `["sident", "usa"]`. Let's calculate the BM25-weighted $\
 $$
 \text{bm25\_weighted\_tf}(`sident', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 × 2.4167}\right) \cdot 1 ≈ 0.5641
 $$
+
 - "usa":
 
 $$
@@ -366,6 +373,7 @@ So the relevance score of document "4" against the query becomes:
 $$
 BM25(q, 4) \approx \mathrm{idf}(`sident') \times \text{bm25\_weighted\_tf}(`sident', 4) + \mathrm{idf}(`usa') \times \text{bm25\_weighted\_tf}(`usa', 4)
 $$
+
 $$
 BM25(q, 4) \approx 1.4816 \times 0.5641 + 1.4816 \times 1.2754 \approx 2.7252
 $$
@@ -373,6 +381,7 @@ $$
 #### Relevance score of doc_id "5" against query: BM25(q, 5)
 
 If you repeat the steps above you would find that:
+
 $$
 BM25(q, 5) = 5.6648
 $$
