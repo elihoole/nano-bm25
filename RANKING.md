@@ -138,7 +138,7 @@ $$
 \mathrm{idf}(t) = \ln\left(\frac{N + 1}{\mathrm{df}(t) + 1}\right) + 1
 $$
 
-Without smoothing, it is just $\ln\!\left(\frac{N}{\mathrm{df}(t)}\right)$ (defined only when $\mathrm{df}(t) > 0$). The added 1 terms in the smoothed IDF formula serve the following functions:
+Without smoothing, it is just $\ln\left(\frac{N}{\mathrm{df}(t)}\right)$ (defined only when $\mathrm{df}(t) > 0$). The added 1 terms in the smoothed IDF formula serve the following functions:
 
 - numerator +1: part of add-one (Laplace) smoothing; keeps the log argument finite even for degenerate corpora (e.g., $N=0$) and, together with the denominator +1, ensures the ratio is always >= 1.
 - denominator +1: prevents division by zero when $\mathrm{df}(t)=0$ (term not observed) and is the other half of Laplace smoothing.
