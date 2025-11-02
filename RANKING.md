@@ -326,25 +326,25 @@ $$
 $$
 
 
-Numbers for this index and query terms:
+- Numbers for this index and query terms:
 
-- $N = 10$
+$N = 10$
 
-Document frequencies for matched terms:
+- Document frequencies for matched terms:
 
-- $sident = 2; usa = 2; rule = 1; constitu = 2$
+$sident = 2; usa = 2; rule = 1; constitu = 2$
 
-Inverse document frequencies for the same terms under new formula above:
+- Inverse document frequencies for the same terms under new formula above:
 
-- $sident ≈ 1.4816; usa ≈ 1.4816; constitu ≈ 1.4816; rule ≈ 1.9924$
+$sident ≈ 1.4816; usa ≈ 1.4816; constitu ≈ 1.4816; rule ≈ 1.9924$
 
-Document lengths:
+- Document lengths:
 
-- $dl(4) = 26; dl(5) = 12; avgdl = 9.0$
+$dl(4) = 26; dl(5) = 12; avgdl = 9.0$
 
-Constants:
+- Constants:
 
-- $k_1 = 1.2$; $b = 0.75$
+$k_1 = 1.2$; $b = 0.75$
 
 #### Relevance score of doc_id "4" against query: BM25(q, 4)
 
