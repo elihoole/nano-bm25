@@ -359,7 +359,7 @@ Matched terms in 4 are `["sident", "usa"]`. Let's calculate the BM25-weighted $\
 "sident":
 
 $$
-\text{bm25_weighted_tf}(`sident', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 × 2.4167}\right) \cdot 1 ≈ 0.5641
+\text{bm25\_weighted\_tf}(`sident', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 × 2.4167}\right) \cdot 1 ≈ 0.5641
 $$
 
 "usa":
