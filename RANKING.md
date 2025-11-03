@@ -371,11 +371,11 @@ $$
 So the relevance score of document "4" against the query becomes:
 
 $$
-    \text{BM25}(q, 4) \approx \mathrm{idf}(\texttt{sident}) \times \text{bm25-weighted-tf}(\texttt{sident}, 4) + \mathrm{idf}(\texttt{usa}) \times \text{bm25-weighted-tf}(\texttt{usa}, 4)
+    \mathrm{BM25}(q, 4) \approx \mathrm{idf}(\texttt{sident}) \times \text{bm25-weighted-tf}(\texttt{sident}, 4) + \mathrm{idf}(\texttt{usa}) \times \text{bm25-weighted-tf}(\texttt{usa}, 4)
 $$
 
 $$
-BM25(q, 4) \approx 1.4816 \times 0.5641 + 1.4816 \times 1.2754 \approx 2.7252
+\mathrm{BM25}(q, 4) \approx 1.4816 \times 0.5641 + 1.4816 \times 1.2754 \approx 2.7252
 $$
 
 #### Relevance score of doc_id "5" against query: BM25(q, 5)
@@ -383,7 +383,7 @@ $$
 If you repeat the steps above you would find that:
 
 $$
-BM25(q, 5) = 5.6648
+\mathrm{BM25}(q, 5) = 5.6648
 $$
 
 We can be happy: with our defaults for $k_1$ and $b$, BM25 ranks doc 5 above doc 4 (5.6648 > 2.7254). Repetition of a common term in doc 4 ("usa") saturates and is further tempered by length normalisation, while doc 5’s broader coverage of discriminative terms (including rule) is rewarded.
