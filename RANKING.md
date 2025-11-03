@@ -315,9 +315,13 @@ $$
 \mathrm{idf}(t) = \ln\left(\frac{N - df(t) + 0.5}{df(t) + 0.5} + 1\right)
 $$
 
-This is not all that different from the earlier $\mathrm{idf}(t)$ formula. $+0.5$ and $+1$ in this equation play analogous roles to the $+1$ in the earlier equation. This particular form of $\mathrm{idf}(t)$, derived from work in probability, is verified to be better in empirical studies.
+$$
+------- (**)
+$$
 
-Note: In the earlier IDF/TF-IDF sections, we used the smoothed IDF $\ln\left(\frac{N+1}{df(t)+1}\right) + 1$. For BM25, it's common to use the probabilistic IDF above; both serve to downweight common terms and upweight rarer ones.
+
+Note: In the earlier IDF/TF-IDF sections, we used the smoothed IDF $\ln\left(\frac{N+1}{df(t)+1}\right) + 1$. For BM25, it's common to use the probabilistic IDF above; both serve to downweight common terms and upweight rarer ones. The new formula $(**)$ is not all that different from the earlier $\mathrm{idf}(t)$ formula. $+0.5$ and $+1$ in the new equation play analogous roles to the $+1$ in the earlier equation. This particular form of $\mathrm{idf}(t)$, derived from work in probability, is verified to be better in empirical studies.
+
 
 To score the relevance of a document under BM25 weighting against a given query:
 
