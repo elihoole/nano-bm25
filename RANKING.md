@@ -371,7 +371,7 @@ $$
 So the relevance score of document "4" against the query becomes:
 
 $$
-BM25(q, 4) \approx \mathrm{idf}(\texttt{sident}) \times \texttt{bm25\_weighted\_tf}(\texttt{sident}, 4) + \mathrm{idf}(\texttt{usa}) \times \texttt{bm25\_weighted\_tf}(\texttt{usa}, 4)
+BM25(q, 4) \approx \mathrm{idf}(`sident') \times \text{bm25-weighted-tf}(`sident`, 4) + \mathrm{idf}(`usa') \times \text{bm25-weighted-tf}(`usa', 4)
 $$
 
 $$
