@@ -359,13 +359,13 @@ Matched terms in 4 are `["sident", "usa"]`. Let's calculate the BM25-weighted $\
 "sident":
 
 $$
-	exttt{bm25\_weighted\_tf}(\texttt{sident}, 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C}\,\mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 \times 2.4167}\right)\cdot 1 \approx 0.5641
+	\text{bm25-weighted-tf}(\texttt{sident}, 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C}\,\mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 \times 2.4167}\right)\cdot 1 \approx 0.5641
 $$
 
 "usa":
 
 $$
-	exttt{bm25\_weighted\_tf}(\texttt{usa}, 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C}\,\mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{4 + 1.2 \times 2.4167}\right)\cdot 4 \approx 1.2754
+	\text{bm25-weighted-tf}(\texttt{usa}, 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C}\,\mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{4 + 1.2 \times 2.4167}\right)\cdot 4 \approx 1.2754
 $$
 
 So the relevance score of document "4" against the query becomes:
