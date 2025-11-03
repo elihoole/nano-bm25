@@ -359,13 +359,13 @@ Matched terms in 4 are `["sident", "usa"]`. Let's calculate the BM25-weighted $\
 "sident":
 
 $$
-\text{bm25\_weighted\_tf}(`sident', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 × 2.4167}\right) \cdot 1 ≈ 0.5641
+\text{bm25_weighted_tf}(`sident', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{1 + 1.2 × 2.4167}\right) \cdot 1 ≈ 0.5641
 $$
 
 "usa":
 
 $$
-\text{bm25\_weighted\_tf}(`usa', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{4 + 1.2 × 2.4167}\right) \cdot 4 ≈ 1.2754
+\text{bm25_weighted_tf}(`usa', 4) = \frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \cdot \mathrm{tf}(t,d) = \left(\frac{1.2 + 1}{4 + 1.2 × 2.4167}\right) \cdot 4 ≈ 1.2754
 $$
 
 So the relevance score of document "4" against the query becomes:
@@ -389,6 +389,7 @@ $$
 We can be happy: with our defaults for $k_1$ and $b$, BM25 ranks doc 5 above doc 4 (5.6648 > 2.7254). Repetition of a common term in doc 4 ("usa") saturates and is further tempered by length normalisation, while doc 5’s broader coverage of discriminative terms (including rule) is rewarded.
 
 To verify, run:
+
 ```bash
 curl -s "http://127.0.0.1:8000/bm25_ranking?query=Can%20the%20president%20of%20the%20USA%20overrule%20the%20constitution%3F" | python -m json.tool
 ```
