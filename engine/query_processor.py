@@ -1,9 +1,9 @@
-from index import (
+from .indexer import (
     preprocess,
     remove_stop_words,
     tokenize,
 )
-from stemmer import stem
+from .stemmer import stem
 
 
 def process_query(query: str) -> list[str]:

@@ -4,9 +4,9 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
 
-from bm25 import rank_with_bm25
-from query import process_query
-from tfidf_ranker import (
+from engine.bm25_ranker import rank_with_bm25
+from engine.query_processor import process_query
+from engine.tfidf_ranker import (
     rank_with_idf,
     rank_with_sublinear_tf_idf,
     rank_with_tf,

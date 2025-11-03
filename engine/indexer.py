@@ -3,7 +3,7 @@ import os
 import re
 from pathlib import Path
 
-from stemmer import stem
+from .stemmer import stem
 
 
 def read_docs(filepath: Path):
@@ -52,7 +52,13 @@ def remove_stop_words(words: list[str]) -> list[str]:
     """
     Given a list of words, remove stopwords
     """
-    with open("stopwords/stopwords.txt", "r") as f:
+    # Resolve stopwords path relative to the project root/package
+    base_dir = Path(__file__).resolve().parent.parent  # repo root when run via main.py
+    stopwords_path = base_dir / "stopwords" / "stopwords.txt"
+    if not stopwords_path.exists():
+        # Fallback to current working directory style path
+        stopwords_path = Path("stopwords/stopwords.txt")
+    with stopwords_path.open("r", encoding="utf-8") as f:
         stop_words = f.readlines()
     stop_words = [word.strip() for word in stop_words]
     return [word for word in words if word not in stop_words]

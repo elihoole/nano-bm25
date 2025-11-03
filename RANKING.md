@@ -400,7 +400,7 @@ curl -s "http://127.0.0.1:8000/bm25_ranking?query=Can%20the%20president%20of%20t
 
 To get debug prints run:
 ```bash
-uv run bm25.py
+uv run engine/bm25_ranker.py
 ```
 
 
