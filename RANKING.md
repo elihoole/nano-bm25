@@ -243,7 +243,7 @@ This is where BM25 enters the picture. Under BM25, we weight TF with a damping f
 The contribution of a matched term in a document to the relevance score looks like this:
 
 $$
-\mathrm{contrib}(t,d)=\mathrm{idf}(t) \times \left[\frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1 \times C} \right] \cdot \mathrm{tf}(t,d)
+\mathrm{contrib}(t,d)=\mathrm{idf}(t) \times \left[\frac{(k_1+1)}{\mathrm{tf}(t,d) + k_1 \times C} \right] \cdot \mathrm{tf}(t,d)
 $$
 
 $$
@@ -253,7 +253,7 @@ $$
 Where,
 
 $$
-C = (1 - b) + b \times \frac{dl}{avgdl}
+C = \text{document length normalization factor}
 $$
 
 
