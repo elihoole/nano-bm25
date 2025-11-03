@@ -303,7 +303,7 @@ That is, as $k_1 \to 0$ the damping effect gets severe: the scaling factor actua
 
 Now, let's work through BM25 calculation for documents "4" and "5".
 
-Recall $\mathrm{contrib}(t, d)$ given in $-------(*)$:
+Recall $\mathrm{contrib}(t, d)$ given in $(*)$:
 
 $$
 \text{contrib-bm25}(t,d)=\mathrm{idf}(t) \times \left[\frac{(k_1+1)}{\mathrm{tf}(t,d)+k_1\,C} \right] \cdot \mathrm{tf}(t,d)
