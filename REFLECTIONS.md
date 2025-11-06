@@ -111,11 +111,11 @@ What does this mean for my everyday? Following DHH's advice, I am going to stop 
 
 ### Against disembodiment: finding my pen and paper
 
-After reflecting on how much I've lost by moving away from hands-on practice, I decided to deliberately return to more tactile, focused forms of learning. I wanted to see if reconnecting with the physical process of working through problems could help restore some of the sharpness and satisfaction I'd been missing.
+That I could not recall how BM25 works, even with the code open in front of me, bothered me a great deal. I decided to revisit it in the only way I know makes learning stick.
 
-Last Saturday, I took the train back from Jaffna to Colombo. Before leaving, I dusted up my copy of *Introduction to Information Retrieval* textbook by Manning et al. after four years. My scientific calculator had run out of battery; I got a new Casio ES-991 Plus from Poobalsingham Bookstore. During the journey, I hand computed BM25 scores for a query against a toy corpus I created. I turned it into a repo: [nano-bm25](https://github.com/elihoole/nano-bm25).
+Last Saturday, I took the train back from Jaffna to Colombo. Before leaving, I dusted up my copy of *Introduction to Information Retrieval* textbook by Manning et al. after four years. My scientific calculator had run out of battery; I got a new *Casio ES-991 Plus* from Poobalsingham Bookstore. During the journey, I hand computed BM25 scores on a toy corpus I created and wrote a step-by-step explainer: [nano-bm25](https://github.com/elihoole/nano-bm25).
 
-What surprised me most was how this process seemed to reawaken parts of my cognition that had been dormant. Working through the math by hand, I felt myself accessing the deeper symbolic reasoning I had described earlier—those faculties that only emerge when manipulating raw numerics and tracing patterns line by line. The deliberate pace and tactile satisfaction of pen on paper forced me to engage my full attention, and I could sense the difference: the quiet joy of the math on paper matching the math on code, and the unmistakable feeling of marshalling more than an ounce of my cognition, rather than just coasting on autopilot.
+I felt as though I was unlocking parts of my mind that had long lain dormant. As I worked through the math by hand, with the steady rhythm of the train engine in the background, I slipped into a meditative focus. The deliberate pace, the tactile satisfaction of pen on paper, and the quiet joy of seeing the math on paper align perfectly with the math in code—all of it brought a renewed sense of clarity and engagement.
 
-This was embodied learning. And I am going to do more of it.
+This was embodied practice. And I am going to do more of it.
 
