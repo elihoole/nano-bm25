@@ -115,9 +115,6 @@ That I could not recall how BM25 works, even with the code open in front of me, 
 
 Last Saturday, I took the train back from Jaffna to Colombo. Before leaving, I dusted up my copy of *Introduction to Information Retrieval* textbook by Manning et al. after four years. My scientific calculator had run out of battery; I got a new *Casio ES-991 Plus* from Poobalsingham Bookstore. During the journey, I hand computed BM25 scores on a toy corpus I created and wrote a step-by-step explainer: [nano-bm25](https://github.com/elihoole/nano-bm25).
 
-I felt as though I was unlocking parts of my mind that had long lain dormant. As I worked through the math by hand, with the steady rhythm of the train engine in the background, I slipped into a meditative focus. The deliberate pace, the tactile satisfaction of pen on paper, and the quiet joy of seeing the math on paper align perfectly with the math in code—all of it brought a renewed sense of clarity and engagement.
+I felt as though I was unlocking parts of my mind that had long lain dormant. As I worked through the math by hand, with the steady rhythm of the train engine in the background, I slipped into a meditative focus. The deliberate pace, the tactile satisfaction of pen on paper, and the quiet joy of seeing the math on paper align with the math in code.
 
 This was embodied practice. And I am going to do more of it.
-
-
-
