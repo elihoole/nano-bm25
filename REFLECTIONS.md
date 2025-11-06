@@ -119,3 +119,5 @@ I felt as though I was unlocking parts of my mind that had long lain dormant. As
 
 This was embodied practice. And I am going to do more of it.
 
+
+
