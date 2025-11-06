@@ -1,239 +1,158 @@
 # Nano BM25
 
-Date: 2025-10-28
+A minimal, from-scratch implementation of a BM25 search engine to rebuild and reinforce information retrieval fundamentals.
 
-TL;DR
-- I blanked on the query side of classic IR during an interview. So I rebuilt a tiny retrieval stack from scratch here to refresh the fundamentals.
-- This repo builds a positional inverted index, exposes a minimal HTTP endpoint, and sets the stage for adding BM25 ranking next.
-- It’s intentionally tiny and dependency-light to force understanding over abstraction.
+## Navigation
 
-## Why I’m writing this
+This repository is organized into three parts: a search engine, an explainer on rankings, and some reflections on the why of this repo.
 
-I interviewed for a search role. I work with search every day, but mostly via high-level APIs (Typesense, etc.). In the interview, questions rightly targeted fundamentals. I could visualize indexing, but on the query side I froze. I recalled “term frequency” and “inverse document frequency,” but not the exact flow or formula under pressure.
+1. **[README.md](README.md)** (this file) — How to run the repository
+2. **[RANKING.md](RANKING.md)** — Deep dive into BM25 and ranking algorithms
+3. **[REFLECTIONS.md](REFLECTIONS.md)** — The motivation and philosophical reflections behind this project
 
-Abstractions are wonderful . . . until they atrophy the muscles they replace. This project is my reset: rebuild the basics, end to end, in a few files.
+## Overview
 
-## What this repo contains
+This repo implements a complete text retrieval pipeline:
+- Positional inverted index
+- Multiple ranking algorithms (TF, IDF, TF-IDF, BM25)
+- FastAPI-based HTTP endpoints
+- Intentionally minimal dependencies to force understanding over abstraction
 
-- Documents: `docs/docs.txt` (one document per line)
-- Indexer: `index.py` (preprocess → tokenize → stopword removal → stem → positional inverted index)
-- Query processing: `query.py` (same preprocessing pipeline for queries)
-- HTTP API: `main.py` (FastAPI; a simple `/string_search` endpoint that introspects the index and terms)
-- Index artifact: `index/positional_inverted_index.json`
-- Toy stemmer: `stemmer.py` (intentionally simple, to surface tradeoffs)
+## Project Structure
 
-## Rebuilding the pipeline
+```
+engine/
+├── indexer.py              # Document preprocessing and positional inverted index builder
+├── query_processor.py      # Query preprocessing pipeline
+├── stemmer.py             # Toy affix-based stemmer
+├── bm25_ranker.py         # BM25 scoring implementation
+└── tfidf_ranker.py        # TF-IDF scoring variants
 
-Document side (indexing):
-1) Preprocess: lowercase, strip, keep only word chars and . , : ; ! ?
-2) Tokenize: split on whitespace and treat the allowed punctuation as separate tokens
-3) Remove stop-words: from `stopwords/stopwords.txt`
-4) Stem: crude affix stripper in `stemmer.py`
-5) Build positional inverted index: `{ term: { doc_id: [positions...] } }`
-
-Example (shape, not actual values):
-{
-        "usa": { "3": [4], "4": [1] },
-        "trump": { "2": [6], "3": [1, 13] }
-}
-
-The positions make phrase queries and proximity queries possible later; they also give us per-(term, doc) term frequency as `len(positions)` for BM25.
-
-## Query side, minimally
-
-`process_query()` applies the same pipeline to the input text and returns normalized terms. Because the stemmer removes prefixes like "pre-", the word "president" becomes `sident`. That’s not “correct,” but it’s deliberate: it keeps the system transparent and reminds me what real stemmers do better.
-
-`/string_search` currently:
-- loads `index/positional_inverted_index.json` into memory
-- prints the index and the incoming query
-- returns a tiny JSON summary of which docs contain the processed terms
-
-This is the plumbing you need right before adding ranking.
-
-## How to run it
-
-1) Build the index (creates `index/positional_inverted_index.json`):
-
-```bash
-python3 index.py
+main.py                    # FastAPI server with ranking endpoints
+docs/docs.txt              # Toy corpus (one document per line)
+index/positional_inverted_index.json  # Generated index artifact
+stopwords/stopwords.txt    # Stop words list
 ```
 
-2) Start the API server (any ASGI runner works):
+## The Preprocessing Pipeline
+
+**Document side (indexing):**
+1. Preprocess: lowercase, strip, keep only word chars and `. , : ; ! ?`
+2. Tokenize: split on whitespace, treat allowed punctuation as separate tokens
+3. Remove stop-words from `stopwords/stopwords.txt`
+4. Stem: crude affix stripper (intentionally simple to surface tradeoffs)
+5. Build positional inverted index: `{ term: { doc_id: [positions...] } }`
+
+**Query side:**
+- Apply the same preprocessing pipeline
+- Returns normalized terms ready for ranking
+
+The positions enable phrase queries, proximity queries, and provide per-(term, doc) term frequency as `len(positions)` for BM25.
+
+## Quick Start
+
+### 1. Build the Index
+
+Generate the positional inverted index from the document corpus:
 
 ```bash
-uvicorn main:app --reload --port 8000
+uv run engine/indexer.py
 ```
 
-3) Try a query:
+This creates `index/positional_inverted_index.json`.
+
+### 2. Start the API Server
+
+Launch the FastAPI server:
 
 ```bash
-curl "http://localhost:8000/string_search?query=Can%20the%20President%20of%20the%20USA%20overrule%20the%20constitution%3F"
+uv run uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
-You’ll see which normalized terms were found and in which documents. That’s our jumping-off point for ranking.
+### 3. Query the Endpoints
 
-## Fetch all docs that contain at least one query term
-
-The most basic notion of relevance is that a document contains at least one of the query terms. To fetch all docs that contain at least one term in the query:
+The server exposes several ranking endpoints. Example query:
 
 ```bash
-curl "http://localhost:8000/fetch_all_docs?query=Can%20the%20President%20of%20the%20USA%20overrule%20the%20constitution%3F"
+curl -s "http://127.0.0.1:8000/bm25_ranking?query=Can%20the%20President%20of%20the%20USA%20overrule%20the%20constitution%3F" | python -m json.tool
 ```
 
-## Ranked retrieval with just term frequency
+## Available Endpoints
 
-We introduce the idea that documents where query terms occur more . . . are more relevant than others. To retrieve a ranked list of documents based on how many times a query term occured in the document.
+The API provides several ranking methods, from basic to sophisticated:
+
+### `/fetch_all_docs`
+Retrieves all documents containing at least one query term (union of postings).
 
 ```bash
-curl "http://localhost:8000/tf_ranking?query=Can%20the%20President%20of%20the%20USA%20overrule%20the%20constitution%3F"
+curl -s "http://127.0.0.1:8000/fetch_all_docs?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
 ```
 
-## Retrieval with TF-IDF
+### `/tf_ranking`
+Ranks by raw term frequency (count of query term occurrences).
 
-We'll first do ranked retrieval with TF-IDF only.
+```bash
+curl -s "http://127.0.0.1:8000/tf_ranking?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
+```
 
-## BM25, in one screen
+### `/idf_ranking`
+Ranks by inverse document frequency (boosts rare terms, ignores common ones).
 
-For a query Q and document D, the BM25 score is the sum over query terms q of:
+```bash
+curl -s "http://127.0.0.1:8000/idf_ranking?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
+```
 
-score(D, Q) = sum over q in Q of [ IDF(q) * ((tf(q, D) * (k1 + 1)) / (tf(q, D) + k1 * (1 - b + b * |D|/avgdl))) ]
+### `/tf_idf_ranking`
+Traditional TF-IDF scoring (linear or sublinear TF × IDF).
 
-Where:
-- tf(q, D): term frequency of q in D (here: length of the positions list for q in D)
-- |D|: document length in tokens after preprocessing
-- avgdl: average document length across the corpus
-- k1: saturation parameter, usually ~1.2–1.5
-- b: length normalization, usually ~0.75
-- IDF(q): log((N - n(q) + 0.5) / (n(q) + 0.5) + 1)
-        - N: total number of documents
-        - n(q): number of documents containing q
+```bash
+curl -s "http://127.0.0.1:8000/tf_idf_ranking?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
+```
 
-Why this matters: tf alone rewards verbosity; IDF rewards rarity; b and |D|/avgdl avoid penalizing or over-rewarding long documents.
+### `/bm25_ranking`
+State-of-the-art BM25 scoring with length normalization and saturation.
 
-## What I’ll add next
+```bash
+curl -s "http://127.0.0.1:8000/bm25_ranking?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
+```
 
-- BM25 scoring and ranking endpoint:
-        - precompute: doc lengths, avgdl, N
-        - query-time: for each term, compute tf from positions, n(q) from postings, then sum per-doc
-        - return top-k results with simple scores
-- Phrase and proximity queries (thanks to positions)
-- Boolean operators (AND, OR, NOT) as minimal set operators over posting lists
-- Small test corpus and unit tests over tokenization/stemming/IDF/score
-- A better stemmer (Porter) or just plug in a library with a clear flag to keep it deterministic
+### `/string_search`
+Debug endpoint: shows processed query terms and raw index lookups.
 
-## A note on abstractions
+```bash
+curl -s "http://127.0.0.1:8000/string_search?query=Can%20the%20President%20overrule%20the%20constitution%3F" | python -m json.tool
+```
 
-APIs made shipping search easy enough that I stopped thinking about the mechanics. That’s a gift—and a trap. This repo’s goal is humility and clarity: get the fundamentals back into muscle memory, then bring the right abstractions back in with intention.
+## Understanding Ranking
 
-## File map (quick reference)
+For detailed mathematical explanations, worked examples, and step-by-step BM25 calculations, see **[RANKING.md](RANKING.md)**.
 
-- `index.py`: read docs → preprocess → tokenize → stopwords → stem → build PII → write JSON
-- `query.py`: `process_query()` for normalized query terms
-- `main.py`: FastAPI app with `/fetch_all_relevant_docs` and other end points
-- `docs/docs.txt`: toy corpus (one document per line)
-- `index/positional_inverted_index.json`: generated index
-- `stemmer.py`: toy affix-based stemmer
+## Why This Project Exists
 
-That’s the core. Next commit: actual BM25 ranking.
+This isn't just a toy implementation—it's a deliberate exercise in fighting abstraction rot.
 
+> "Abstractions are wonderful... until they atrophy the muscles they replace."
 
+Working with high-level search APIs (Typesense) made shipping easy but left me unable to answer basic questions about how search actually works. This project is my reset: rebuild the fundamentals, end to end, in a few files, with no dependencies.
 
+For a rather long reflection on the effects of abstraction, AI-assisted coding, and the disembodiment of practice, read **[REFLECTIONS.md](REFLECTIONS.md)**.
 
+## What's Deliberately Simple
 
+- **Stemmer**: A crude affix stripper that turns "president" into "sident". This is intentionally transparent to show what real stemmers (Porter, Snowball) do better.
+- **Corpus**: 10 documents, one per line in `docs/docs.txt`. Just enough to demonstrate ranking differences.
+- **Dependencies**: FastAPI, uvicorn, and Python standard library. No external search libraries.
 
+The simplicity is the point.
 
+## Future Work
 
+The main thing I want to implement is document vector model. And then and add reciprocal rank fusion to combine bm25 with vector similarity.
 
+## License
 
+This is a learning project. Use it, fork it, learn from it.
 
+---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-+
+**Start here**: [README.md](README.md) → [RANKING.md](RANKING.md) → [REFLECTIONS.md](REFLECTIONS.md)

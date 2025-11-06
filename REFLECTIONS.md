@@ -4,7 +4,7 @@ A reflection on the effects of abstraction, AI, and disembodiment.
 
 ## Background
 
-I interviewed for a search engineering role. Since I work on search stuff everyday at [paralegal.lk](https://www.paralegal.lk), I assumed that my relevant technical knowledge is up to scratch. A busy work week meant that I went in a underprepared. Rust from not having interviewed for technical roles for nearly two years had a compounding impact.
+I interviewed for a search engineering role. Since I work on search stuff everyday at [paralegal.lk](https://www.paralegal.lk), I assumed that my relevant technical knowledge is up to scratch. A busy work week meant that I went in underprepared. Rust from not having interviewed for technical roles for nearly two years had a compounding impact.
 
  At the interview, most questions focused on search fundamentals: preprocessing, indexing, general purpose retrieval algorithms, etc. Stuff I know quite well. Or, stuff I thought I knew quite well. It turned out that I could not, infact, answer some basic questions.
 
