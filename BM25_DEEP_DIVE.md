@@ -119,3 +119,47 @@ So:
 Bottom line for this repo’s example:
 - Reasonable defaults (k1≈1.2, b≈0.75) make doc 5 outrank doc 4 because it covers more discriminative terms. Repetition of a common term in a longer doc can’t overpower that coverage due to saturation and length normalization.
 
+
+
+Cognitive offloading is now the default interaction pattern. Instead of retrieving from memory, I prompt. Instead of reconstructing an algorithm, I confirm a snippet. Retrieval practice — the thing that actually consolidates knowledge — is replaced by quick lookups that feel like understanding but never cross the threshold into long-term memory.
+
+The workflow has shifted from modeling to orchestration. I used to keep a compact mental model and consult docs at the margins. Now I iterate prompts until something runs. I get the result faster, but I stop earlier, before the invariants stick: why saturation matters in BM25, where length normalization bites, how idf is actually smoothed. The job gets done; the schema never forms.
+
+AI also floods me with plausible alternatives. Ten acceptable variants later, I have built nothing durable. The stack traces, the dead ends, the hard-won edges that anchor a concept — all evaporate with the tab. Throughput rises; retention craters.
+
+And AI reduces friction everywhere. The very difficulty that once carved memory — the pause to derive, to test, to write by hand — is abstracted away. In production this is a feature. In an interview without the prosthesis, it is a cliff.
+
+
+
+AI changed the cost model of thinking. I optimized for latency and got amnesia as a side effect. The fix is not abstinence; it’s paying some latency back where memory actually forms.
+
+
+## notes
+### Fighting abstraction: Touching the parts that make or break that which we do
+
+Thesis: we can't avoid abstraction. But we can be conscious about what we abstract and how much we abstract. I don't really care that I don't know React well. Building frontends is not something I see myself doing . it does not really interest me beyond its immediate utility. But I love search and the core of paralegal.lk is search. So I should not really off load too much of search if I want paralegal.lk to teach me about search. Good heuristic to know what level of abstraction is a good level of abstraction: are we actively touching parts of the code that make or break that which we care about. so in search stff that matters to final search relevance - stuff that determines whether search is taking milliseconds or minutes -- we must be getting our hands dirty on those. This is how we fight abstraction.
+
+### Fighting AI:
+
+
+Thesis: there's no going back to the good old days of Stack Overflow. There is no turning off AI. Can we still not use agent mode? Can we have . In the words of DHH:
+
+Now, I actually love collaborating with AI too. I love chiseling my code, and the way I use AI is in a separate window. I don’t let it drive my code. I’ve tried that. I’ve tried the Cursors and the Windsurfs and I don’t enjoy that way of writing.
+(01:29:03) One of the reasons I don’t enjoy that way of writing is, I can literally feel competence draining out of my fingers. That level of immediacy with the material disappears.
+
+9:03) One of the reasons I don’t enjoy that way of writing is, I can literally feel competence draining out of my fingers. That level of immediacy with the material disappears. Where I felt this the most was, I did this remix of Ubuntu called Omakub when I switched to Linux. It’s all written in Bash. I’d never written any serious amount of code in Bash before, so I was using AI to collaborate, to write a bunch of Bash with me, because I needed all this. I knew what I wanted, I could express it in Ruby, but I thought it was an interesting challenge to filter it through Bash. Because what I was doing was setting up a Linux machine, that’s basically what Bash was designed for. It’s a great constraint. But what I found myself doing was asking AI for the same way of expressing a conditional, for example, in Bash over and over again. That by not typing it, I wasn’t learning it. I was using it, I was getting the expression I wanted, but I wasn’t learning it. I got a little scared.
+(01:30:08) I got a little scared, is this the end of learning? Am I no longer learning if I’m not typing? The way I, for me, recast that was, I don’t want to give up on the AI. It’s such a better experience as a programmer to look up APIs, to get a second opinion on something, to do a draft, but I have to do the typing myself because you learn with your fingers. If you’re learning how to play the guitar, you can watch as many YouTube videos as you want, you’re not going to learn the guitar. You have to put your fingers on the strings to actually learn the motions. I think there is a parallel here to programming, where programming has to be learned in part by the actual typing.
+
+But I think the more crucial aspect for me is, I really care about the competence. I’ve seen what happens to even great programmers the moment they put away the keyboard, because even before AI, this would happen as soon as people would get promoted.
+
+ If you don’t have your fingers in the sauce (the source) you are going to lose touch with it. There’s just no other way. I don’t want that because I enjoy it too much. … The joy of a programmer, … is to type the code myself
+
+So time to switch to neovim or some text editor and AI on browser.
+
+### Fighting anti embodiment
+
+
+Parts covered earlier also. We'll end with a story. Last saturday I took the train back from jaffna to colombo. And I  had Information Retrieval text book (physical) by Manning et al. I opened that book after four years. I worked through BM25 by hand on a toy corpus I created. I wrote nano-bm25 repo. I have had the book since my edinburgh uni days. My calculators had run out of battery. I got a new Es 991 plus casio.
+
+I did the math by hand. On paper.  step by step. It was slow at the start but I tasted some of the joys of my engineering undergraduate days. :)
+https://github.com/elihoole/nano-bm25
