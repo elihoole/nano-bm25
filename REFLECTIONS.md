@@ -14,7 +14,7 @@ But this is where my mental model of a search engine just . . . blanked. Beyond 
 
 Now, the humiliating bit. I had linked a repo from January 2023 in my CV, a Django-based case law retrieval service I'd built for a Colombo university law professor. The application used BM25 for full-text search, handled Boolean queries (ex: term A AND NOT term B), phrase queries (exact matches of the form "term C term D term E") with distance tolerance, and a few other custom retrieval mechanisms. During the online interview, I had the code open in front of me via screen share with my interviewers. Even so, I couldn't recall the basic mechanics of BM25 or how it addresses the limitations of TF-IDF scoring.
 
-## Coda
+## Reflection
 
 While the constraints of the interview format -- the pressure to reply instantly, the absence of access to our primary recall mechanism in 2025, ChatGPT, and the inability to consult reference materials -- certainly didn't help me, they are merely proximate causes.
 
@@ -48,7 +48,7 @@ Now, this very march of abstraction is why software runs the world: it frees up 
 
 Is there’s a point on the curve of abstraction where we stop doing our jobs as engineers? Questions once rooted in technology are now questions of economics, and in most production systems, we simply choose between "managed" services. Is a "search engineer" who simply picks between Typesense Cloud vs. Algolia for building an e-commerce site, largely basing the choice on projected monthly cost, actually doing search engineering?
 
-### {} AI
+### AI distancing
 
 AI, of course, didn't directly cause me to fail the interview. But over the past two years, code assistants have quietly restructured my cognitive habits. On reflection, at least some of my struggles trace back to this shift.
 
@@ -56,11 +56,11 @@ The interview crystallised something I have been increasingly aware of. The furt
 
 My strength as an engineer is big-picture thinking; many observant senior engineers, to whom I’ve reported, have told me this. Details though have always required effort. Yet here’s the irony: to truly understand big pictures — ones built on mathematical insight or years of experimental results,  ones worth knowing, ones that blow your mind — I’ve had to work through the details. Symbolic reasoning only emerged from manipulating raw numerics, working through toy problems, and tracing patterns across them. Slowly, line by line, on paper. Lectures felt like wasted time. Real learning, to me, meant sitting down with a textbook, a few sheets of paper, a pen, and a calculator, and grinding through the particulars. Similarly, when it came to understanding large software systems, I had to step through the debugger and inspect intermediate values.
 
-Early in my programming career, typing out every line forced that same focus on details. Auto-complete eroded it slightly. AI code assistants have nearly eliminated it. Now I write high-level requirements, sketch some instructions, specify critical edge cases, then watch my inanimate AI "agents" thrash out the code. Such "vibe coding" in known domains requires virtually no thinking. Before production, I just test thoroughly with tests that, again, the same agents write for me.
+In my day to day, AI code assistants have nearly eliminated the need to work through the details an implementation. I write high-level requirements, sketch some instructions, specify critical edge cases, then watch my inanimate AI "agents" thrash out the code. Such "vibe coding" in known domains requires virtually no thinking. Before production, I just test thoroughly with tests that, again, the same agents write for me.
 
-AI has had a similar effect as abstraction: it distances me from the details that matter. These are the details that give rise to higher-level reasoning and ground big-picture thinking. Without engaging with them, critical cognitive muscles atrophy. This has had a debilitating effect on my general intellectual sharpness and the interview exposed this viscerally. Rust has set in where there was once a well-oiled machine. Even on questions I answered correctly, thought lagged intention. Answers came slower than I would have liked.
+AI, thus, has had a similar effect as abstraction: it distances me from the details that matter. These are the details that give rise to higher-level reasoning and ground big-picture thinking. Without engaging with them, critical cognitive muscles atrophy. This has had a debilitating effect on my general intellectual sharpness and the interview exposed this viscerally. Rust has set in where in what was once a well-oiled machine. Even on questions I answered correctly, thought lagged intention. Answers came slower than I would have liked.
 
-### Losing embodied practice
+### Disembodied practice
 
 A question on reciprocal rank fusion (RRF) at the interview reminded me how conceptual knowledge slips when I don’t work it by hand. To execute paralegal.lk's hybrid mode queries, Typesense fuses custom text-match scores with vector similarity using RRF. I’ve known this since the beginning, but I never had to revisit the math, for reasons I set out under the ill effects of abstraction.
 
@@ -79,7 +79,7 @@ In a recent interview, DHH, the creator of Ruby on Rails, had this to say:
 
 Stepping away from pen, paper, and keyboard means losing touch with the essence of craft. My RRF stumble was not an isolated mistake but a symptom of disembodied practice.
 
-## Raging against the dying of the light
+## A beggining: raging against the dying of the light
 
 Sure, a few hours of hard-nosed prep would have saved me some embarrassment. But that's not the story here. This isn't a how-to for interviews—it's a manifesto for staying sharp. How do I keep learning while building? How do I hold onto what matters beyond the next sprint? How do I keep my mind fierce and alive when APIs do the thinking and AI does the typing? This is my rallying cry. Rage, rage against the dying of the light.
 
