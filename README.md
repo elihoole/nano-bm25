@@ -51,6 +51,18 @@ The positions enable phrase queries, proximity queries, and provide per-(term, d
 
 ## Quick Start
 
+Note: this is proejct was developed and tested on Ubuntu 24.04.
+
+###  Preliminary: setup the project
+
+If you don't have uv, follow the instructions here: [install-uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+To setup the project:
+
+```bash
+uv sync
+```
+
 ### 1. Build the Index
 
 Generate the positional inverted index from the document corpus:
