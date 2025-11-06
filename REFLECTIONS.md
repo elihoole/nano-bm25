@@ -1,4 +1,4 @@
-# Craft over output
+# Output over craft
 
 A reflection on the effects of abstraction, AI, and disembodiment.
 
