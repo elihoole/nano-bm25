@@ -1,16 +1,28 @@
 # Output over craft
 
-A reflection on the effects of abstraction, AI, and disembodied work.
+A reflection on the effects of abstractIs there a point on the curve of abstraction where we stop doing our jobs as engineers? Questions once rooted in technology are now questions of economics, and in most production systems, we simply choose between "managed" services. Is a "search engineer" who simply picks between Typesense Cloud vs. Algolia for building an e-commerce site, largely basing the choice on projected monthly cost, actually doing search engineering?on, AI, and disembodied work.
+
+## Table of Contents
+
+- [Background](#background)
+- [Reflection](#reflection)
+    - [Rising abstraction](#rising-abstraction)
+    - [AI distancing](#ai-distancing)
+    - [Disembodied practice](#disembodied-practice)
+- [A beginning: raging against the dying of the light](#a-beginning-raging-against-the-dying-of-the-light)
+    - [Against abstraction: getting my hands dirty in what matters](#against-abstraction-getting-my-hands-dirty-in-what-matters)
+    - [Against AI: keeping my fingers in the sauce](#against-ai-keeping-my-fingers-in-the-sauce)
+    - [Against disembodiment: finding my pen and paper](#against-disembodiment-finding-my-pen-and-paper)
 
 ## Background
 
 I interviewed for a search engineering role. Since I work on search stuff everyday at [paralegal.lk](https://www.paralegal.lk), I assumed that my relevant technical knowledge is up to scratch. A busy work week meant that I went in underprepared. Rust from not having interviewed for technical roles for nearly two years had a compounding impact.
 
- At the interview, most questions focused on search fundamentals: preprocessing, indexing, general purpose retrieval algorithms, etc. Stuff I know quite well. Or, stuff I thought I knew quite well. It turned out that I could not, infact, answer some basic questions.
+At the interview, most questions focused on search fundamentals: preprocessing, indexing, general purpose retrieval algorithms, etc. Stuff I know quite well. Or, stuff I thought I knew quite well. It turned out that I could not, in fact, answer some basic questions.
 
 I could visualise the critical steps up to indexing. Start with a bunch of documents, lower case the text, strip away punctuation, delete stop words, stem, and then create a positional inverted index. I could also picture the logical layout of a typical positional inverted index.
 
-But this is where my mental model of a search engine just . . . blanked. Beyond applying the same document preprocessing steps to queries, my head was empty. The query-side mechanics - i.e., the process of retrieval - had evaporated from my memory. Even the bits that I remembered were patchy. I could, for instance, conceptually explain term frequency (TF) and inverse document frequencey (IDF). But although I recalled that IDF is a logarithmic function, the structure of its smoothed form typically implemented in retrieval engines evaded my mind.
+But this is where my mental model of a search engine just . . . blanked. Beyond applying the same document preprocessing steps to queries, my head was empty. The query-side mechanics - i.e., the process of retrieval - had evaporated from my memory. Even the bits that I remembered were patchy. I could, for instance, conceptually explain term frequency (TF) and inverse document frequency (IDF). But although I recalled that IDF is a logarithmic function, the structure of its smoothed form typically implemented in retrieval engines evaded my mind.
 
 Now, the humiliating bit. I had linked a repo from January 2023 in my CV, a Django-based case law retrieval service I'd built for a Colombo university law professor. The application used BM25 for full-text search, handled Boolean queries (ex: term A AND NOT term B), phrase queries (exact matches of the form "term C term D term E") with distance tolerance, and a few other custom retrieval mechanisms. During the online interview, I had the code open in front of me via screen share with my interviewers. Even so, I couldn't recall the basic mechanics of BM25 or how it addresses the limitations of TF-IDF scoring.
 
@@ -56,9 +68,9 @@ The interview crystallised something I have been increasingly aware of. The furt
 
 My strength as an engineer is big-picture thinking; many observant senior engineers, to whom I’ve reported, have told me this. Details though have always required effort. Yet here’s the irony: to truly understand big pictures — ones built on mathematical insight or years of experimental results,  ones worth knowing, ones that blow your mind — I’ve had to work through the details. Symbolic reasoning only emerged from manipulating raw numerics, working through toy problems, and tracing patterns across them. Slowly, line by line, on paper. Lectures felt like wasted time. Real learning, to me, meant sitting down with a textbook, a few sheets of paper, a pen, and a calculator, and grinding through the particulars. Similarly, when it came to understanding large software systems, I had to step through the debugger and inspect intermediate values.
 
-In my day to day, AI code assistants have nearly eliminated the need to work through the details an implementation. I write high-level requirements, sketch some instructions, specify critical edge cases, then watch my inanimate AI "agents" thrash out the code. Such "vibe coding" in known domains requires virtually no thinking. Before production, I just test thoroughly with tests that, again, the same agents write for me.
+In my day to day, AI code assistants have nearly eliminated the need to work through the details of an implementation. I write high-level requirements, sketch some instructions, specify critical edge cases, then watch my inanimate AI "agents" thrash out the code. Such "vibe coding" in known domains requires virtually no thinking. Before production, I just test thoroughly with tests that, again, the same agents write for me.
 
-AI, thus, has had a similar effect as abstraction: it distances me from the details that matter. These are the details that give rise to higher-level reasoning and ground big-picture thinking. Without engaging with them, critical cognitive muscles atrophy. This has had a debilitating effect on my general intellectual sharpness and the interview exposed this viscerally. Rust has set in where in what was once a well-oiled machine. Even on questions I answered correctly, thought lagged intention. Answers came slower than I would have liked.
+AI, thus, has had a similar effect as abstraction: it distances me from the details that matter. These details give rise to higher-level reasoning and ground big-picture thinking. Without engaging with them, critical cognitive muscles atrophy. This has had a debilitating effect on my general intellectual sharpness and the interview exposed this viscerally. Rust has set in what was once a well-oiled machine. Even on questions I answered correctly, thought lagged intention. Answers came slower than I would have liked.
 
 ### Disembodied practice
 
@@ -93,7 +105,7 @@ But I actually love search as a computing problem. It is at the heart of everyth
 
 Now that I've finally plugged nearly every data hole, it's time to shake things up and migrate [paralegal.lk](https://www.paralegal.lk). Will I be hand-tuning how bits are packed into SSD pages? Absolutely not. The heuristic for the right level abstraction is this: am I elbow-deep in the code that actually makes or breaks what I care about?
 
-In search, that means relevance and speed. The scoring functions that determine which document surfaces first. The index structures that decide whether a query takes milliseconds or minutes. These are the levers that actually move the needle on search quality. It is time to get my hands dirty on those parts. I will be migrating to a platform that, by design, forces me to think about the details of search. It could be Elasticsearch, it may be Lucene. I will update this post when I do make the call.
+In search, that means relevance and speed. The scoring functions that determine which document surfaces first. The index structures that decide whether a query takes milliseconds or minutes. These are the levers that actually move the needle on search quality. It is time to get my hands dirty on those parts. I will be migrating to a platform that, by design, forces me to think about the details of search. It could be Elasticsearch, it may be Lucene. I will update this post when I make the call.
 
 ### Against AI: keeping my fingers in the sauce
 
