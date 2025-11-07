@@ -1,6 +1,6 @@
 # Output over craft
 
-A reflection on the effects of abstractIs there a point on the curve of abstraction where we stop doing our jobs as engineers? Questions once rooted in technology are now questions of economics, and in most production systems, we simply choose between "managed" services. Is a "search engineer" who simply picks between Typesense Cloud vs. Algolia for building an e-commerce site, largely basing the choice on projected monthly cost, actually doing search engineering?on, AI, and disembodied work.
+A reflection on the effects of abstraction, AI, and disembodied work.
 
 ## Table of Contents
 
